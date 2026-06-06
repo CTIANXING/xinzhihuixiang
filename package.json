@@ -4,7 +4,8 @@
   "private": true,
   "description": "SillyTavern Web Integration (Vanilla JS)",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run bundle",
+    "typecheck": "tsc --noEmit",
     "dev": "tsc --watch",
     "bundle": "esbuild src/game-entry.ts --bundle --format=esm --outfile=dist/game-bundle.js --target=es2020",
     "bundle:watch": "esbuild src/game-entry.ts --bundle --format=esm --outfile=dist/game-bundle.js --target=es2020 --watch"

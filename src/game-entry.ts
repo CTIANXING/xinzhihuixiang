@@ -14,5 +14,5 @@ export type { ApiRouter } from './sillytavern/api-router';
 export { fetchModels, testConnection, getFallbackModels } from './sillytavern/api-tools';
 export { createDefaultPreset, DEFAULT_SETTINGS, DEFAULT_TAGS, DEFAULT_OPAQUE_TAGS, DEFAULT_PROMPT_ORDER, DEFAULT_FORMAT_PROMPT } from './sillytavern/types';
 export type { Lorebook, LorebookEntry, ChatPreset, AppSettings, ApiSettings, ChatMessage, ChatSession, MatchedEntry, ParsedTags, VarsPatch, Task, ApiTarget, SillyTavernLorebookExport } from './sillytavern/types';
-export { importSillytavernLorebook, createDefaultLorebook, createDefaultEntry } from './sillytavern/importer';
-export { createDefaultEntry as createDefaultEntryUtil, createDefaultLorebook as createDefaultLorebookUtil, applyEntryDefaults, updateEntry, removeEntry, movePromptItem, clampNumber } from './sillytavern/editor-utils';
+export { importLorebook, exportLorebook, importPreset, exportPreset, importJsonFile, exportToJson, importMultipleLorebooks, renameLorebook } from './sillytavern/importer';
+export { createDefaultEntry, createDefaultLorebook, applyEntryDefaults, updateEntry, removeEntry, movePromptItem, clampNumber } from './sillytavern/editor-utils';

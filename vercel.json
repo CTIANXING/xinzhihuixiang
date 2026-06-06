@@ -1,0 +1,18 @@
+{
+  "buildCommand": "npm run bundle",
+  "outputDirectory": ".",
+  "installCommand": "npm install --no-audit --no-fund",
+  "framework": null,
+  "rewrites": [
+    { "source": "/", "destination": "/game.html" }
+  ],
+  "headers": [
+    {
+      "source": "/dist/(.*)",
+      "headers": [
+        { "key": "Content-Type", "value": "application/javascript" },
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
+    }
+  ]
+}

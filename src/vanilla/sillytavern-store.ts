@@ -59,15 +59,16 @@ export function createSillytavernStore() {
 
   const createChat = async (name?: string) => {
     if (!settings) throw new Error('Settings not loaded');
-    const chatCount = chats.filter(c => c.characterName === settings.characterName).length;
-    const chatName = name || `${settings.characterName} - 新对话 ${chatCount + 1}`;
+    const s = settings;
+    const chatCount = chats.filter(c => c.characterName === s.characterName).length;
+    const chatName = name || `${s.characterName} - 新对话 ${chatCount + 1}`;
     const newChat: ChatSession = {
       id: crypto.randomUUID(),
       name: chatName,
       messages: [],
-      characterName: settings.characterName,
-      userName: settings.userName,
-      presetId: settings.activePresetId || presets[0]?.id || null,
+      characterName: s.characterName,
+      userName: s.userName,
+      presetId: s.activePresetId || presets[0]?.id || null,
       lorebookIds: [...activeLorebookIds],
       variables: {},
       createdAt: Date.now(),
@@ -105,6 +106,7 @@ export function createSillytavernStore() {
 
   const sendMessage = async (content: string) => {
     if (!settings || !activeChatId) throw new Error('No active chat or settings not loaded');
+    const s = settings;
     const activeChat = chats.find(c => c.id === activeChatId);
     if (!activeChat) throw new Error('Active chat not found');
 
@@ -112,7 +114,7 @@ export function createSillytavernStore() {
     notify();
 
     try {
-      const activePreset = presets.find(p => p.id === settings.activePresetId) || presets[0];
+      const activePreset = presets.find(p => p.id === s.activePresetId) || presets[0];
       if (!activePreset) throw new Error('No preset available');
 
       const activeBooks = lorebooks.filter(b => activeLorebookIds.includes(b.id));
@@ -134,13 +136,13 @@ export function createSillytavernStore() {
         history: updatedMessages,
         preset: activePreset,
         lorebooks: activeBooks,
-        userName: settings.userName,
-        characterName: settings.characterName,
+        userName: s.userName,
+        characterName: s.characterName,
         variables: currentVariables,
       });
 
       const requestBody: Record<string, any> = {
-        model: activePreset.settings.openai_model || settings.api.model,
+        model: activePreset.settings.openai_model || s.api.model,
         messages: promptMessages,
       };
       if (activePreset.settings.temp_openai !== undefined) requestBody.temperature = activePreset.settings.temp_openai;
@@ -150,10 +152,10 @@ export function createSillytavernStore() {
       if (activePreset.settings.pres_pen_openai !== undefined) requestBody.presence_penalty = activePreset.settings.pres_pen_openai;
       if (activePreset.settings.stream_openai !== undefined) requestBody.stream = activePreset.settings.stream_openai;
 
-      const response = await fetch(settings.api.baseUrl + '/chat/completions', {
+      const response = await fetch(s.api.baseUrl + '/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${settings.api.apiKey}`,
+          'Authorization': `Bearer ${s.api.apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
@@ -212,14 +214,15 @@ export function createSillytavernStore() {
   const branchFromMessage = async (messageId: string, name?: string) => {
     const activeChat = chats.find(c => c.id === activeChatId);
     if (!activeChat || !settings) throw new Error('No active chat');
+    const s = settings;
     const idx = activeChat.messages.findIndex(m => m.id === messageId);
     if (idx === -1) throw new Error('Message not found');
 
-    const branchCount = chats.filter(c => c.characterName === settings.characterName).length;
-    const branchName = name || `${settings.characterName} - 分支 ${branchCount + 1}`;
+    const branchCount = chats.filter(c => c.characterName === s.characterName).length;
+    const branchName = name || `${s.characterName} - 分支 ${branchCount + 1}`;
     const newChat = branchChat(activeChat, idx, {
       name: branchName,
-      presetId: settings.activePresetId || presets[0]?.id || null,
+      presetId: s.activePresetId || presets[0]?.id || null,
       lorebookIds: [...activeLorebookIds],
       variables: activeChat.messages[idx].variables,
     });

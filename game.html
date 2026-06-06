@@ -932,7 +932,7 @@ import {
   saveLorebook, deleteLorebook,
   savePreset, deletePreset,
   getChats, saveChat, deleteChat as deleteChatDb,
-  importSillytavernLorebook, createDefaultLorebook as createDefaultLorebookUtil, createDefaultEntry,
+  importLorebook, createDefaultLorebook, createDefaultEntry,
   createDefaultPreset, DEFAULT_SETTINGS, DEFAULT_FORMAT_PROMPT,
   StreamTagParser, aggregateEvents, applyParsedToChat,
   fetchModels, testConnection, getFallbackModels,
@@ -1598,7 +1598,8 @@ async function handleImportLorebook(){
   if(!json){showToast('请粘贴 JSON 内容','warning');return;}
   try{
     const data=JSON.parse(json);
-    const book=importSillytavernLorebook(data);
+    const result=importLorebook(data);
+    const book = { ...result, id: crypto.randomUUID(), createdAt: Date.now(), updatedAt: Date.now() };
     await sillytavernStore.saveLorebook(book);
     closeModal('modal-lorebook');
     openLorebookModal();
@@ -1611,8 +1612,7 @@ async function handleCreateLorebook(){
   const name=document.getElementById('lb-create-name').value.trim();
   const desc=document.getElementById('lb-create-desc').value.trim();
   if(!name){showToast('请输入名称','warning');return;}
-  const book=createDefaultLorebookUtil();
-  book.name=name;
+  const book=createDefaultLorebook(name);
   book.description=desc||'';
   book.entries=[createDefaultEntry()];
   book.entries[0].content='在这里编写世界观设定...';

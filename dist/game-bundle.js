@@ -6868,6 +6868,206 @@ var SUPPORTED_MACROS = [
   { name: "{{\u53D8\u91CF\u540D}}", description: "\u81EA\u5B9A\u4E49\u53D8\u91CF\uFF08\u4F8B\u5982 {{hp}}\uFF09" }
 ];
 
+// src/sillytavern/importer.ts
+var POSITION_MAP = {
+  0: "before_char",
+  1: "after_char",
+  2: "before_example",
+  3: "after_example",
+  4: "at_depth",
+  5: "example_msg_top",
+  6: "example_msg_bottom",
+  7: "outlet"
+};
+var REVERSE_POSITION_MAP = {
+  before_char: 0,
+  after_char: 1,
+  before_example: 2,
+  after_example: 3,
+  at_depth: 4,
+  example_msg_top: 5,
+  example_msg_bottom: 6,
+  outlet: 7
+};
+var LOGIC_MAP = {
+  0: "and_any",
+  1: "not_all",
+  2: "not_any",
+  3: "and_all"
+};
+var REVERSE_LOGIC_MAP = {
+  and_any: 0,
+  not_all: 1,
+  not_any: 2,
+  and_all: 3
+};
+function importLorebook(data) {
+  const rawEntries = Object.values(data.entries || {});
+  const entries = rawEntries.filter((e) => !e.disable && !e.excluded).map((e) => ({
+    id: crypto.randomUUID(),
+    keys: e.key || [],
+    secondaryKeys: e.keysecondary || [],
+    content: e.content || "",
+    comment: e.comment,
+    order: e.order ?? 100,
+    position: POSITION_MAP[e.position ?? 1] ?? "after_char",
+    depth: e.depth,
+    role: e.role,
+    selective: e.selective ?? false,
+    selectiveLogic: LOGIC_MAP[e.selectiveLogic ?? 1] ?? "not_all",
+    constant: e.constant ?? false,
+    probability: e.useProbability ? e.probability ?? 100 : 100,
+    useProbability: e.useProbability ?? false,
+    addMemo: e.addMemo ?? false,
+    sticky: e.sticky,
+    cooldown: e.cooldown,
+    delay: e.delay,
+    weight: e.weight,
+    scanDepth: e.scanDepth,
+    caseSensitive: e.caseSensitive,
+    matchWholeWords: e.matchWholeWords,
+    excludeRecursion: e.excludeRecursion,
+    preventRecursion: e.preventRecursion,
+    useGroupScoring: e.useGroupScoring,
+    matchPersonaDescription: e.matchPersonaDescription,
+    matchCharacterDescription: e.matchCharacterDescription,
+    matchCharacterPersonality: e.matchCharacterPersonality,
+    matchCharacterDepthPrompt: e.matchCharacterDepthPrompt,
+    matchScenario: e.matchScenario,
+    matchCreatorNotes: e.matchCreatorNotes,
+    group: e.group,
+    decorators: e.decorators,
+    characterFilter: e.characterFilter
+  }));
+  return {
+    name: data.name || "\u5BFC\u5165\u7684\u4E16\u754C\u4E66",
+    description: data.description,
+    entries,
+    recursiveScanning: data.settings?.recursive_scanning ?? false,
+    caseSensitive: data.settings?.case_sensitive ?? false,
+    matchWholeWords: data.settings?.match_whole_words ?? false
+  };
+}
+function exportLorebook(lorebook) {
+  const entries = {};
+  lorebook.entries.forEach((e, index) => {
+    entries[String(index)] = {
+      uid: index,
+      key: e.keys,
+      keysecondary: e.secondaryKeys || [],
+      comment: e.comment || e.content.slice(0, 50),
+      content: e.content,
+      constant: e.constant,
+      selective: e.selective,
+      selectiveLogic: REVERSE_LOGIC_MAP[e.selectiveLogic] ?? 1,
+      addMemo: e.addMemo,
+      order: e.order,
+      position: REVERSE_POSITION_MAP[e.position],
+      role: e.role ?? 0,
+      disable: false,
+      probability: e.probability,
+      depth: e.depth ?? 4,
+      group: e.group ?? "",
+      useProbability: e.useProbability ?? e.probability < 100,
+      excluded: false,
+      sticky: e.sticky ?? 0,
+      cooldown: e.cooldown ?? 0,
+      delay: e.delay ?? 0,
+      weight: e.weight ?? 100,
+      scanDepth: e.scanDepth ?? 0,
+      caseSensitive: e.caseSensitive ?? false,
+      matchWholeWords: e.matchWholeWords ?? false,
+      excludeRecursion: e.excludeRecursion ?? false,
+      preventRecursion: e.preventRecursion ?? false,
+      useGroupScoring: e.useGroupScoring ?? false,
+      matchPersonaDescription: e.matchPersonaDescription ?? false,
+      matchCharacterDescription: e.matchCharacterDescription ?? false,
+      matchCharacterPersonality: e.matchCharacterPersonality ?? false,
+      matchCharacterDepthPrompt: e.matchCharacterDepthPrompt ?? false,
+      matchScenario: e.matchScenario ?? false,
+      matchCreatorNotes: e.matchCreatorNotes ?? false,
+      decorators: e.decorators ?? [],
+      characterFilter: e.characterFilter ?? { isExclude: false, names: [], tags: [] }
+    };
+  });
+  return {
+    name: lorebook.name,
+    description: lorebook.description,
+    entries,
+    settings: {
+      recursive_scanning: lorebook.recursiveScanning,
+      case_sensitive: lorebook.caseSensitive,
+      match_whole_words: lorebook.matchWholeWords
+    }
+  };
+}
+function importPreset(data) {
+  const name = data.preset || data.name || "\u5BFC\u5165\u7684\u9884\u8BBE";
+  return {
+    name,
+    description: data.description,
+    settings: data
+  };
+}
+function exportPreset(preset) {
+  return {
+    ...preset.settings,
+    name: preset.name,
+    description: preset.description
+  };
+}
+async function importJsonFile() {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.onchange = async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) {
+        resolve(null);
+        return;
+      }
+      try {
+        const text = await file.text();
+        resolve(JSON.parse(text));
+      } catch {
+        resolve(null);
+      }
+    };
+    input.click();
+  });
+}
+function exportToJson(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function importMultipleLorebooks(inputs) {
+  const successes = [];
+  const failures = [];
+  for (const input of inputs) {
+    try {
+      if (!input.json || typeof input.json !== "object" || Array.isArray(input.json)) {
+        throw new Error("Invalid lorebook JSON: expected an object");
+      }
+      const lb = importLorebook(input.json);
+      successes.push({ fileName: input.fileName, lorebook: lb });
+    } catch (e) {
+      failures.push({ fileName: input.fileName, error: String(e.message ?? e) });
+    }
+  }
+  return { successes, failures };
+}
+function renameLorebook(lb, newName) {
+  return { ...lb, name: newName, updatedAt: Date.now() };
+}
+
 // src/sillytavern/stream-parser.ts
 var PARTIAL_LIMIT = 64;
 var StreamTagParser = class {
@@ -7243,15 +7443,16 @@ function createSillytavernStore() {
   };
   const createChat = async (name) => {
     if (!settings) throw new Error("Settings not loaded");
-    const chatCount = chats.filter((c) => c.characterName === settings.characterName).length;
-    const chatName = name || `${settings.characterName} - \u65B0\u5BF9\u8BDD ${chatCount + 1}`;
+    const s = settings;
+    const chatCount = chats.filter((c) => c.characterName === s.characterName).length;
+    const chatName = name || `${s.characterName} - \u65B0\u5BF9\u8BDD ${chatCount + 1}`;
     const newChat = {
       id: crypto.randomUUID(),
       name: chatName,
       messages: [],
-      characterName: settings.characterName,
-      userName: settings.userName,
-      presetId: settings.activePresetId || presets[0]?.id || null,
+      characterName: s.characterName,
+      userName: s.userName,
+      presetId: s.activePresetId || presets[0]?.id || null,
       lorebookIds: [...activeLorebookIds],
       variables: {},
       createdAt: Date.now(),
@@ -7285,12 +7486,13 @@ function createSillytavernStore() {
   };
   const sendMessage = async (content) => {
     if (!settings || !activeChatId) throw new Error("No active chat or settings not loaded");
+    const s = settings;
     const activeChat = chats.find((c) => c.id === activeChatId);
     if (!activeChat) throw new Error("Active chat not found");
     isSending = true;
     notify();
     try {
-      const activePreset = presets.find((p) => p.id === settings.activePresetId) || presets[0];
+      const activePreset = presets.find((p) => p.id === s.activePresetId) || presets[0];
       if (!activePreset) throw new Error("No preset available");
       const activeBooks = lorebooks.filter((b) => activeLorebookIds.includes(b.id));
       const currentVariables = activeChat.variables || {};
@@ -7308,12 +7510,12 @@ function createSillytavernStore() {
         history: updatedMessages,
         preset: activePreset,
         lorebooks: activeBooks,
-        userName: settings.userName,
-        characterName: settings.characterName,
+        userName: s.userName,
+        characterName: s.characterName,
         variables: currentVariables
       });
       const requestBody = {
-        model: activePreset.settings.openai_model || settings.api.model,
+        model: activePreset.settings.openai_model || s.api.model,
         messages: promptMessages
       };
       if (activePreset.settings.temp_openai !== void 0) requestBody.temperature = activePreset.settings.temp_openai;
@@ -7322,10 +7524,10 @@ function createSillytavernStore() {
       if (activePreset.settings.freq_pen_openai !== void 0) requestBody.frequency_penalty = activePreset.settings.freq_pen_openai;
       if (activePreset.settings.pres_pen_openai !== void 0) requestBody.presence_penalty = activePreset.settings.pres_pen_openai;
       if (activePreset.settings.stream_openai !== void 0) requestBody.stream = activePreset.settings.stream_openai;
-      const response = await fetch(settings.api.baseUrl + "/chat/completions", {
+      const response = await fetch(s.api.baseUrl + "/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${settings.api.apiKey}`,
+          "Authorization": `Bearer ${s.api.apiKey}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify(requestBody)
@@ -7375,13 +7577,14 @@ function createSillytavernStore() {
   const branchFromMessage = async (messageId, name) => {
     const activeChat = chats.find((c) => c.id === activeChatId);
     if (!activeChat || !settings) throw new Error("No active chat");
+    const s = settings;
     const idx = activeChat.messages.findIndex((m) => m.id === messageId);
     if (idx === -1) throw new Error("Message not found");
-    const branchCount = chats.filter((c) => c.characterName === settings.characterName).length;
-    const branchName = name || `${settings.characterName} - \u5206\u652F ${branchCount + 1}`;
+    const branchCount = chats.filter((c) => c.characterName === s.characterName).length;
+    const branchName = name || `${s.characterName} - \u5206\u652F ${branchCount + 1}`;
     const newChat = branchChat(activeChat, idx, {
       name: branchName,
-      presetId: settings.activePresetId || presets[0]?.id || null,
+      presetId: s.activePresetId || presets[0]?.id || null,
       lorebookIds: [...activeLorebookIds],
       variables: activeChat.messages[idx].variables
     });
@@ -7462,8 +7665,8 @@ export {
   branchChat,
   clampNumber,
   createApiRouter,
-  createDefaultEntry as createDefaultEntryUtil,
-  createDefaultLorebook as createDefaultLorebookUtil,
+  createDefaultEntry,
+  createDefaultLorebook,
   createDefaultPreset,
   createLorebookEngine,
   createSillytavernStore,
@@ -7471,6 +7674,9 @@ export {
   deleteLorebook,
   deletePreset,
   exportAllData,
+  exportLorebook,
+  exportPreset,
+  exportToJson,
   extractVariables,
   fetchModels,
   formatVariablesForPrompt,
@@ -7480,11 +7686,16 @@ export {
   getPresets,
   getSettings,
   importAllData,
+  importJsonFile,
+  importLorebook,
+  importMultipleLorebooks,
+  importPreset,
   initializeDatabase,
   mergeVariables,
   movePromptItem,
   parseVarsBlock,
   removeEntry,
+  renameLorebook,
   replaceMacros,
   saveChat,
   saveLorebook,
