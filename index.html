@@ -937,8 +937,7 @@ import {
   StreamTagParser, aggregateEvents, applyParsedToChat,
   fetchModels, testConnection, getFallbackModels,
   assemblePrompt, replaceMacros, SUPPORTED_MACROS,
-  extractVariables, mergeVariables, formatVariablesForPrompt,
-  type ChatMessage,
+  extractVariables, mergeVariables, formatVariablesForPrompt
 } from './dist/game-bundle.js';
 
 // ==================== GALGAME DATA ====================
@@ -1714,32 +1713,30 @@ window.showConfirm = showConfirm;
 
 // ==================== INIT ====================
 async function initApp(){
-  // SillyTavern store
-  await initializeDatabase();
-  await sillytavernStore.loadAll();
-  storeReady = true;
-
-  // Ensure settings exist
-  if(!sillytavernStore.settings){
-    await saveSettings(DEFAULT_SETTINGS);
+  try {
+    await initializeDatabase();
     await sillytavernStore.loadAll();
+    storeReady = true;
+
+    if(!sillytavernStore.settings){
+      await saveSettings(DEFAULT_SETTINGS);
+      await sillytavernStore.loadAll();
+    }
+
+    renderStory();
+    renderCharacters();
+    refreshGameUI();
+    updateTimeDisplay();
+
+    document.querySelectorAll('.modal-overlay').forEach(o=>{ o.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); }); });
+    document.getElementById('confirm-dialog').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open, .confirm-overlay.open').forEach(m=>m.classList.remove('open')); });
+    document.querySelectorAll('.nav-link').forEach(l=>{ l.addEventListener('click',function(){ navigateTo(this.dataset.page); }); });
+  } catch(e) {
+    document.body.insertAdjacentHTML('beforeend',
+      `<div style="position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(255,80,80,0.2);border:1px solid rgba(255,80,80,0.4);border-radius:12px;padding:16px 24px;max-width:500px;text-align:center;font-size:0.85rem;color:#ffb0b0;">系统初始化失败：${e.message}<br><span style="font-size:0.75rem;color:#ff8080;">请打开浏览器控制台 (F12) 查看详细错误</span></div>`);
+    console.error('App init error:', e);
   }
-
-  // Initial renders
-  renderStory();
-  renderCharacters();
-  refreshGameUI();
-  updateTimeDisplay();
-
-  // Click outside modal to close
-  document.querySelectorAll('.modal-overlay').forEach(o=>{ o.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); }); });
-  document.getElementById('confirm-dialog').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
-
-  // ESC to close modals
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open, .confirm-overlay.open').forEach(m=>m.classList.remove('open')); });
-
-  // Nav click handlers
-  document.querySelectorAll('.nav-link').forEach(l=>{ l.addEventListener('click',function(){ navigateTo(this.dataset.page); }); });
 }
 
 function updateTimeDisplay(){
@@ -1751,8 +1748,12 @@ function updateTimeDisplay(){
   document.getElementById('time-display').textContent = `第 1 天 · ${label}`;
 }
 
-initApp();
-initParticles();
+try {
+  initApp();
+  initParticles();
+} catch(e) {
+  console.error('Module init error:', e);
+}
 </script>
 </body>
 </html>
