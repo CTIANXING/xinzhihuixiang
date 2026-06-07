@@ -1246,7 +1246,7 @@ async function handleGameSend(){
     });
 
     const body = {
-      model: activePreset.settings.openai_model || settings.api.model,
+      model: settings.api.model || activePreset.settings.openai_model || 'gpt-3.5-turbo',
       messages: promptMsgs,
       temperature: activePreset.settings.temp_openai ?? 0.8,
       max_tokens: activePreset.settings.openai_max_tokens ?? 2048,
@@ -1313,7 +1313,11 @@ async function handleGameSend(){
     if(parsed.sum) document.getElementById('sum-text').textContent = parsed.sum;
 
   } catch(e) {
-    showToast('请求失败: ' + e.message, 'warning');
+    const errMsg = e.message || String(e);
+    const suggestion = errMsg.includes('invalid_request_error') ? ' (模型名错误，请在设置或预设中配置正确模型)' :
+      errMsg.includes('401') ? ' (API Key 无效)' :
+      errMsg.includes('404') ? ' (API 地址错误)' : '';
+    showToast('请求失败: ' + errMsg + suggestion, 'warning');
   } finally {
     document.getElementById('game-loading').style.display = 'none';
     document.getElementById('game-input').disabled = false;
@@ -1640,16 +1644,17 @@ async function openPresetModal(){
   const presets = st.presets;
   const panel = document.getElementById('modal-preset-panel');
   panel.innerHTML = `
-    <div class="modal-header"><div><div class="modal-title">预设管理</div><div class="modal-subtitle">管理采样参数与提示词配置</div></div><button class="modal-close" onclick="closeModal('modal-preset')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-header"><div><div class="modal-title">预设管理</div><div class="modal-subtitle">点击预设名称编辑参数与提示词，绿色标签为当前激活</div></div><button class="modal-close" onclick="closeModal('modal-preset')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
       <div class="item-list">${presets.map(p=>`
-        <div class="item-row">
-          <span class="item-name">${escapeHtml(p.name)}</span>
-          <span class="item-meta">${escapeHtml(p.settings.openai_model||'N/A')}</span>
+        <div class="item-row" style="cursor:pointer;">
+          <span class="item-name" onclick="openPresetEditor('${p.id}')" style="cursor:pointer;flex:1;padding:4px 0;" title="点击编辑此预设">${escapeHtml(p.name)}</span>
+          <span class="item-meta">${escapeHtml(p.settings.openai_model||'跟随设置')}</span>
           ${st.settings?.activePresetId===p.id?`<span class="status-badge ok" style="margin:0 6px;">当前</span>`:''}
           <div class="item-actions">
-            <button class="modal-action-btn small" onclick="handleSelectPreset('${p.id}')">选用</button>
-            <button class="modal-action-btn small danger" onclick="handleDeletePreset('${p.id}')">删除</button>
+            <button class="modal-action-btn small" onclick="event.stopPropagation();handleSelectPreset('${p.id}')">选用</button>
+            <button class="modal-action-btn small" onclick="event.stopPropagation();openPresetEditor('${p.id}')">编辑</button>
+            <button class="modal-action-btn small danger" onclick="event.stopPropagation();handleDeletePreset('${p.id}')">删除</button>
           </div>
         </div>`).join('')}</div>
       <button class="modal-action-btn primary" style="margin-top:12px;width:100%;justify-content:center;" onclick="handleCreatePreset()" id="btn-create-preset">
@@ -1659,6 +1664,145 @@ async function openPresetModal(){
   document.getElementById('modal-preset').classList.add('open');
 }
 window.openPresetModal = openPresetModal;
+
+function openPresetEditor(presetId){
+  const st = sillytavernStore;
+  const p = st.presets.find(pr=>pr.id===presetId);
+  if(!p) return;
+  const s = p.settings;
+  const panel = document.getElementById('modal-preset-panel');
+  panel.innerHTML = `
+    <div class="modal-header"><div><div class="modal-title">编辑预设：${escapeHtml(p.name)}</div><div class="modal-subtitle">${escapeHtml(p.description||'')}</div></div><button class="modal-close" onclick="closeModal('modal-preset')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-body">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchPresetEditorTab('params')" id="pe-tab-params">采样参数</button>
+        <button class="tab-btn" onclick="switchPresetEditorTab('prompts')" id="pe-tab-prompts">提示词</button>
+        <button class="tab-btn" onclick="switchPresetEditorTab('order')" id="pe-tab-order">Prompt 排序</button>
+      </div>
+      <div class="tab-panel active" id="pe-panel-params">
+        <div class="form-group"><label class="form-label">预设名称</label><input class="form-input" id="pe-name" value="${escapeHtml(p.name)}" placeholder="预设名称"></div>
+        <div class="form-group"><label class="form-label">描述</label><input class="form-input" id="pe-desc" value="${escapeHtml(p.description||'')}" placeholder="可选描述"></div>
+        <div class="form-group"><label class="form-label">模型 (留空则使用设置中的模型)</label><input class="form-input" id="pe-model" value="${escapeHtml(s.openai_model||'')}" placeholder="例如 deepseek-v4-pro"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label class="form-label">Temperature</label><input class="form-input" id="pe-temp" type="number" step="0.01" min="0" max="2" value="${s.temp_openai??0.8}"></div>
+          <div class="form-group"><label class="form-label">Top P</label><input class="form-input" id="pe-topp" type="number" step="0.01" min="0" max="1" value="${s.top_p_openai??0.9}"></div>
+          <div class="form-group"><label class="form-label">Max Tokens</label><input class="form-input" id="pe-maxtok" type="number" min="1" max="32768" value="${s.openai_max_tokens??2048}"></div>
+          <div class="form-group"><label class="form-label">Max Context</label><input class="form-input" id="pe-maxctx" type="number" min="1" max="131072" value="${s.openai_max_context??4096}"></div>
+          <div class="form-group"><label class="form-label">Frequency Penalty</label><input class="form-input" id="pe-freq" type="number" step="0.01" min="-2" max="2" value="${s.freq_pen_openai??0}"></div>
+          <div class="form-group"><label class="form-label">Presence Penalty</label><input class="form-input" id="pe-pres" type="number" step="0.01" min="-2" max="2" value="${s.pres_pen_openai??0}"></div>
+        </div>
+        <div class="form-group"><label class="form-label"><input type="checkbox" id="pe-stream" ${s.stream_openai?'checked':''} style="margin-right:6px;">启用流式传输 (stream)</label></div>
+      </div>
+      <div class="tab-panel" id="pe-panel-prompts">
+        <div class="form-group"><label class="form-label">Main Prompt ({{char}} = 角色名, {{user}} = 用户名)</label><textarea class="form-textarea" id="pe-main" rows="4">${escapeHtml(s.main||'')}</textarea></div>
+        <div class="form-group"><label class="form-label">Jailbreak Prompt</label><textarea class="form-textarea" id="pe-jailbreak" rows="4">${escapeHtml(s.jailbreak||'')}</textarea></div>
+        <div class="form-group"><label class="form-label">NSFW Prompt</label><textarea class="form-textarea" id="pe-nsfw" rows="3">${escapeHtml(s.nsfw||'')}</textarea></div>
+        <div class="form-group"><label class="form-label">New Chat Prompt</label><textarea class="form-textarea" id="pe-newchat" rows="3">${escapeHtml(s.new_chat_prompt||'')}</textarea></div>
+      </div>
+      <div class="tab-panel" id="pe-panel-order">
+        <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:8px;">拖拽排序 Prompt 块的注入顺序 (拖动后点保存生效)</div>
+        <div id="pe-order-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:20px;">
+        <button class="modal-action-btn" onclick="openPresetModal()" id="btn-preset-back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> 返回列表
+        </button>
+        <button class="modal-action-btn primary" onclick="savePresetEditor('${p.id}')" id="btn-preset-save" data-preset-id="${p.id}">保存预设</button>
+      </div>
+    </div>`;
+  // Build prompt order list
+  buildPromptOrderList(p);
+}
+window.openPresetEditor = openPresetEditor;
+
+function buildPromptOrderList(p){
+  const container = document.getElementById('pe-order-list');
+  const order = p.settings.prompt_order || [];
+  if(!container) return;
+  if(order.length===0){
+    container.innerHTML = '<div style="font-size:0.78rem;color:var(--text-muted);padding:8px;">暂无 Prompt 排序定义</div>';
+    return;
+  }
+  container.innerHTML = order.map((item,i)=>`
+    <div class="item-row" draggable="true" style="cursor:grab;" id="po-${i}">
+      <span style="font-size:0.82rem;">${escapeHtml(item.identifier)}</span>
+      <span style="font-size:0.72rem;color:var(--text-muted);">${escapeHtml(item.name||item.identifier)}</span>
+      <span class="status-badge ${item.enabled!==false?'ok':'err'}">${item.enabled!==false?'启用':'禁用'}</span>
+      <div class="item-actions">
+        <button class="modal-action-btn small" onclick="togglePromptOrderItem(${i})">${item.enabled!==false?'禁用':'启用'}</button>
+        ${i>0?`<button class="modal-action-btn small" onclick="movePromptOrderItem(${i},-1)">↑</button>`:''}
+        ${i<order.length-1?`<button class="modal-action-btn small" onclick="movePromptOrderItem(${i},1)">↓</button>`:''}
+      </div>
+    </div>`).join('');
+}
+window.buildPromptOrderList = buildPromptOrderList;
+
+window._poEditedPresetId = null;
+
+function switchPresetEditorTab(tab){
+  document.querySelectorAll('#modal-preset .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#modal-preset .tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pe-tab-'+tab)?.classList.add('active');
+  document.getElementById('pe-panel-'+tab)?.classList.add('active');
+}
+window.switchPresetEditorTab = switchPresetEditorTab;
+
+function togglePromptOrderItem(idx){
+  const st = sillytavernStore;
+  const pid = document.getElementById('btn-preset-save')?.getAttribute('data-preset-id');
+  const p = pid ? st.presets.find(pr=>pr.id===pid) : null;
+  if(!p) return;
+  const order = [...(p.settings.prompt_order||[])];
+  if(order[idx]) order[idx] = {...order[idx], enabled: !(order[idx].enabled!==false)};
+  p.settings.prompt_order = order;
+  buildPromptOrderList(p);
+}
+window.togglePromptOrderItem = togglePromptOrderItem;
+
+function movePromptOrderItem(idx, dir){
+  const st = sillytavernStore;
+  const saveBtn = document.getElementById('btn-preset-save');
+  const pid = saveBtn?.getAttribute('data-preset-id');
+  const p = pid ? st.presets.find(pr=>pr.id===pid) : null;
+  if(!p) return;
+  const order = [...(p.settings.prompt_order||[])];
+  const newIdx = idx + dir;
+  if(newIdx<0||newIdx>=order.length) return;
+  [order[idx], order[newIdx]] = [order[newIdx], order[idx]];
+  p.settings.prompt_order = order;
+  buildPromptOrderList(p);
+}
+window.movePromptOrderItem = movePromptOrderItem;
+
+async function savePresetEditor(presetId){
+  const st = sillytavernStore;
+  const p = st.presets.find(pr=>pr.id===presetId);
+  if(!p) return;
+  p.name = document.getElementById('pe-name')?.value?.trim() || p.name;
+  p.description = document.getElementById('pe-desc')?.value?.trim() || '';
+  p.settings = {
+    ...p.settings,
+    openai_model: document.getElementById('pe-model')?.value?.trim() || '',
+    temp_openai: parseFloat(document.getElementById('pe-temp')?.value) ?? 0.8,
+    top_p_openai: parseFloat(document.getElementById('pe-topp')?.value) ?? 0.9,
+    openai_max_tokens: parseInt(document.getElementById('pe-maxtok')?.value) || 2048,
+    openai_max_context: parseInt(document.getElementById('pe-maxctx')?.value) || 4096,
+    freq_pen_openai: parseFloat(document.getElementById('pe-freq')?.value) ?? 0,
+    pres_pen_openai: parseFloat(document.getElementById('pe-pres')?.value) ?? 0,
+    stream_openai: document.getElementById('pe-stream')?.checked || false,
+    main: document.getElementById('pe-main')?.value || '',
+    jailbreak: document.getElementById('pe-jailbreak')?.value || '',
+    nsfw: document.getElementById('pe-nsfw')?.value || '',
+    new_chat_prompt: document.getElementById('pe-newchat')?.value || '',
+  };
+  p.updatedAt = Date.now();
+  await st.savePreset(p);
+  await st.loadAll();
+  closeModal('modal-preset');
+  openPresetModal();
+  showToast(`预设「${p.name}」已保存`,'success');
+}
+window.savePresetEditor = savePresetEditor;
 
 async function handleSelectPreset(id){
   await sillytavernStore.updateSettings({ activePresetId: id });
