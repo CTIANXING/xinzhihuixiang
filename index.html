@@ -478,6 +478,7 @@ let previousAffection = 10; // for detecting milestone crossings
 let affectionGainedToday = 0;
 let dailyAffectionCap = DEFAULT_DAILY_AFFECTION_CAP;
 let playerRole = 'male'; // 'male'=扮演林澈, 'female'=扮演苏晚晴
+let justLoaded = false; // prevent auto-start after loading save
 
 function getCharName(){return playerRole==='female'?'林澈':'苏晚晴';}
 function getUserName(){return playerRole==='female'?'苏晚晴':'林澈';}
@@ -523,7 +524,7 @@ async function saveToSlot(slotIndex){
     const st=sillytavernStore;
     const allSlots=st.settings?.saveSlots?JSON.parse(st.settings.saveSlots):[];
     allSlots[slotIndex]=slot;
-    st.settings.saveSlots=JSON.stringify(allSlots.filter(Boolean));
+    st.settings.saveSlots=JSON.stringify(allSlots);
     await saveSettings(st.settings);
     await st.loadAll();
     showToast(`已保存到${slot.name}`,'success');
@@ -544,7 +545,10 @@ async function loadFromSlot(slotIndex){
         gs=JSON.parse(slot.data.settings[0].gameState_snapshot);
       }
       if(gs){
-        currentDay=gs.currentDay||1;dayStarted=false;messagesToday=0;currentRound=0;roundHistory=[];
+          currentDay=gs.currentDay||1;
+          dayStarted=false;messagesToday=0;currentRound=0;roundHistory=[];
+          // Keep todayLocation but don't auto-start
+        // Don't auto-start: user should manually begin after loading
         gameCharacters[1].affection=gs.affection||10;previousAffection=gs.previousAffection||10;
         affectionGainedToday=0;diaryEntries=gs.diaryEntries||[];
         dailyAffectionCap=gs.dailyAffectionCap||DEFAULT_DAILY_AFFECTION_CAP;
@@ -553,6 +557,7 @@ async function loadFromSlot(slotIndex){
       }
       await sillytavernStore.loadAll();
       saveGameState();
+      justLoaded=true;
       closeModal('modal-saveload');
       renderHome();renderDiary();renderCharacters();
       document.getElementById('home-role-title').textContent=`当前扮演：${getUserName()}`;
@@ -605,7 +610,7 @@ async function deleteSaveSlot(slotIndex){
     const st=sillytavernStore;
     const allSlots=st.settings?.saveSlots?JSON.parse(st.settings.saveSlots):[];
     allSlots[slotIndex]=null;
-    st.settings.saveSlots=JSON.stringify(allSlots.filter(Boolean));
+    st.settings.saveSlots=JSON.stringify(allSlots);
     await saveSettings(st.settings);
     await st.loadAll();
     closeModal('modal-saveload');
@@ -659,9 +664,10 @@ function navigateTo(page){
   if(page==='characters')renderCharacters();
   if(page==='game'){
     refreshGameUI();
-    if(todayLocation&&!dayStarted&&storeReady){
+    if(todayLocation&&!dayStarted&&storeReady&&!justLoaded){
       beginDayDialogue();
     }
+    justLoaded=false;
   }
   if(page==='home')renderHome();
 }
@@ -1608,6 +1614,7 @@ async function handleImportBackup(event){
         }
         await sillytavernStore.loadAll();
         saveGameState();
+        justLoaded=true;
         closeModal('modal-backup');
         renderHome();renderDiary();renderCharacters();
         document.getElementById('home-role-title').textContent=`当前扮演：${getUserName()}`;
