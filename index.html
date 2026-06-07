@@ -559,7 +559,7 @@ async function loadFromSlot(slotIndex){
           }else{dayStarted=false;messagesToday=0;currentRound=0;}
           roundHistory=[];
         }
-      await sillytavernStore.loadAll();
+        await sillytavernStore.loadAll();
       saveGameState();
       justLoaded=true;
       closeModal('modal-saveload');
@@ -1639,8 +1639,7 @@ async function handleImportBackup(event){
         }else{dayStarted=false;messagesToday=0;currentRound=0;}
         roundHistory=[];
       }
-        }
-        await sillytavernStore.loadAll();
+      await sillytavernStore.loadAll();
         saveGameState();
         justLoaded=true;
         closeModal('modal-backup');
