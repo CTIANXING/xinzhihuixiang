@@ -498,7 +498,9 @@ const MAX_SAVE_SLOTS=10;
 
 async function makeStateSnapshot(){
   const data=await exportAllData();
-  data.gameState={currentDay,todayLocation:todayLocation?.id||null,dayStarted,messagesToday,currentRound,affection:gameCharacters[1].affection,previousAffection,affectionGainedToday,diaryEntries,dailyAffectionCap,playerRole,exportedAt:Date.now()};
+  const gs={currentDay,todayLocation:todayLocation?.id||null,dayStarted,messagesToday,currentRound,affection:gameCharacters[1].affection,previousAffection,affectionGainedToday,diaryEntries,dailyAffectionCap,playerRole,exportedAt:Date.now()};
+  data.gameState=gs;
+  if(data.settings&&data.settings.length>0){data.settings[0].gameState_snapshot=JSON.stringify(gs);}
   return data;
 }
 
@@ -537,7 +539,10 @@ async function loadFromSlot(slotIndex){
   showConfirm('读取存档将覆盖当前进度，确定？',async()=>{
     try{
       await importAllData(slot.data);
-      const gs=slot.data.gameState;
+      let gs=slot.data.gameState;
+      if(!gs&&slot.data.settings&&slot.data.settings[0]?.gameState_snapshot){
+        gs=JSON.parse(slot.data.settings[0].gameState_snapshot);
+      }
       if(gs){
         currentDay=gs.currentDay||1;dayStarted=false;messagesToday=0;currentRound=0;roundHistory=[];
         gameCharacters[1].affection=gs.affection||10;previousAffection=gs.previousAffection||10;
@@ -1552,17 +1557,12 @@ window.openBackupModal=openBackupModal;
 async function exportBackup(){
   try{
     const backup=await exportAllData();
-    // Also inject game state
-    backup.gameState={
-      currentDay,todayLocation:todayLocation?.id||null,
-      dayStarted,messagesToday,currentRound,
-      affection:gameCharacters[1].affection,
-      previousAffection,affectionGainedToday,
-      diaryEntries,playerRole,
-      dailyAffectionCap,
-      exportedAt:Date.now(),
-      version:'1.0',
-    };
+    const gs={currentDay,todayLocation:todayLocation?.id||null,dayStarted,messagesToday,currentRound,affection:gameCharacters[1].affection,previousAffection,affectionGainedToday,diaryEntries,playerRole,dailyAffectionCap,exportedAt:Date.now(),version:'1.0'};
+    backup.gameState=gs;
+    // Also embed in settings for redundancy
+    if(backup.settings&&backup.settings.length>0){
+      backup.settings[0].gameState_snapshot=JSON.stringify(gs);
+    }
     const json=JSON.stringify(backup,null,2);
     const blob=new Blob([json],{type:'application/json'});
     const url=URL.createObjectURL(blob);
@@ -1589,8 +1589,12 @@ async function handleImportBackup(event){
     showConfirm('导入备份将覆盖当前所有数据（设置、预设、世界书、会话、日记、进度）。确定继续？',async()=>{
       try{
         await importAllData(backup);
-        // Restore game state
-        if(backup.gameState){
+        // Restore game state - prefer explicit property, fall back to settings snapshot
+        let gs=backup.gameState;
+        if(!gs&&backup.settings&&backup.settings[0]?.gameState_snapshot){
+          gs=JSON.parse(backup.settings[0].gameState_snapshot);
+        }
+        if(gs){
           currentDay=backup.gameState.currentDay||1;
           dayStarted=false;messagesToday=0;currentRound=0;roundHistory=[];
           if(backup.gameState.affection)gameCharacters[1].affection=backup.gameState.affection;
