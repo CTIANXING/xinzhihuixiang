@@ -552,7 +552,6 @@ async function loadFromSlot(slotIndex){
       renderHome();renderDiary();renderCharacters();
       document.getElementById('home-role-title').textContent=`当前扮演：${getUserName()}`;
       document.getElementById('home-role-desc').textContent=`对方角色为${getCharName()}`;
-      document.getElementById('game-text-area').innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>存档已加载<br>前往主页开始新的一天</p></div>`;
       showToast('存档已加载','success');
     }catch(e){showToast('加载失败: '+e.message,'warning');}
   });
@@ -1559,7 +1558,7 @@ async function exportBackup(){
       dayStarted,messagesToday,currentRound,
       affection:gameCharacters[1].affection,
       previousAffection,affectionGainedToday,
-      diaryEntries,
+      diaryEntries,playerRole,
       dailyAffectionCap,
       exportedAt:Date.now(),
       version:'1.0',
@@ -1598,6 +1597,7 @@ async function handleImportBackup(event){
           if(backup.gameState.diaryEntries)diaryEntries=backup.gameState.diaryEntries;
           if(backup.gameState.previousAffection)previousAffection=backup.gameState.previousAffection;
           if(backup.gameState.dailyAffectionCap)dailyAffectionCap=backup.gameState.dailyAffectionCap;
+          if(backup.gameState.playerRole)playerRole=backup.gameState.playerRole;
           if(backup.gameState.todayLocation){
             todayLocation=Locations.find(l=>l.id===backup.gameState.todayLocation)||null;
           }
@@ -1606,6 +1606,8 @@ async function handleImportBackup(event){
         saveGameState();
         closeModal('modal-backup');
         renderHome();renderDiary();renderCharacters();
+        document.getElementById('home-role-title').textContent=`当前扮演：${getUserName()}`;
+        document.getElementById('home-role-desc').textContent=`对方角色为${getCharName()}`;
         showToast('备份已恢复，数据已同步','success');
       }catch(e){showToast('恢复失败: '+e.message,'warning');}
     });
