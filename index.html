@@ -544,17 +544,21 @@ async function loadFromSlot(slotIndex){
       if(!gs&&slot.data.settings&&slot.data.settings[0]?.gameState_snapshot){
         gs=JSON.parse(slot.data.settings[0].gameState_snapshot);
       }
-      if(gs){
+        if(gs){
           currentDay=gs.currentDay||1;
-          dayStarted=false;messagesToday=0;currentRound=0;roundHistory=[];
-          // Keep todayLocation but don't auto-start
-        // Don't auto-start: user should manually begin after loading
-        gameCharacters[1].affection=gs.affection||10;previousAffection=gs.previousAffection||10;
-        affectionGainedToday=0;diaryEntries=gs.diaryEntries||[];
-        dailyAffectionCap=gs.dailyAffectionCap||DEFAULT_DAILY_AFFECTION_CAP;
-        playerRole=gs.playerRole||'male';
-        todayLocation=gs.todayLocation?Locations.find(l=>l.id===gs.todayLocation)||null:null;
-      }
+          todayLocation=gs.todayLocation?Locations.find(l=>l.id===gs.todayLocation)||null:null;
+          gameCharacters[1].affection=gs.affection||10;
+          previousAffection=gs.previousAffection||10;
+          affectionGainedToday=gs.affectionGainedToday||0;
+          diaryEntries=gs.diaryEntries||[];
+          dailyAffectionCap=gs.dailyAffectionCap||DEFAULT_DAILY_AFFECTION_CAP;
+          playerRole=gs.playerRole||'male';
+          // Restore day state from active chat
+          if(sillytavernStore.activeChat&&sillytavernStore.activeChat.messages.length>0){
+            dayStarted=true;messagesToday=sillytavernStore.activeChat.messages.filter(m=>m.role==='user').length;currentRound=Math.ceil(sillytavernStore.activeChat.messages.length/2);
+          }else{dayStarted=false;messagesToday=0;currentRound=0;}
+          roundHistory=[];
+        }
       await sillytavernStore.loadAll();
       saveGameState();
       justLoaded=true;
@@ -1278,10 +1282,31 @@ window.skipToday=skipToday;
 
 function refreshGameUI(){
   const st=sillytavernStore;
-  // Session list removed - simplified
   document.getElementById('game-day-label').textContent=`第${currentDay}天·${getMonth()}`;
   document.getElementById('game-scene-label').textContent=todayLocation?todayLocation.name:(dayStarted?'进行中':'未开始');
   document.getElementById('game-msg-counter').textContent=`${messagesToday}/${MAX_MESSAGES_PER_DAY}`;
+  // Render chat messages from active session
+  const activeChat=st.activeChat;
+  if(activeChat&&activeChat.messages.length>0){
+    const area=document.getElementById('game-text-area');
+    const existingIds=new Set();
+    area.querySelectorAll('.game-msg').forEach(el=>{if(el.id)existingIds.add(el.id);});
+    for(const msg of activeChat.messages.slice(-20)){
+      const renderedId='gm-rendered-'+msg.id;
+      if(!existingIds.has(renderedId)){
+        const role=msg.role;
+        const parsed=msg.parsed;
+        if(parsed&&parsed.maintext){
+          appendGameMessage(role,parsed.maintext,{thinking:parsed.thinking||''});
+        }else{
+          appendGameMessage(role,msg.content.slice(0,800),null);
+        }
+        const last=area.lastElementChild;
+        if(last)last.id=renderedId;
+      }
+    }
+    if(activeChat.variables)renderGameVars(activeChat.variables,activeChat.messages[activeChat.messages.length-1]?.parsed?.sum||'');
+  }
 }
 window.refreshGameUI=refreshGameUI;
 
@@ -1600,17 +1625,20 @@ async function handleImportBackup(event){
         if(!gs&&backup.settings&&backup.settings[0]?.gameState_snapshot){
           gs=JSON.parse(backup.settings[0].gameState_snapshot);
         }
-        if(gs){
-          currentDay=backup.gameState.currentDay||1;
-          dayStarted=false;messagesToday=0;currentRound=0;roundHistory=[];
-          if(backup.gameState.affection)gameCharacters[1].affection=backup.gameState.affection;
-          if(backup.gameState.diaryEntries)diaryEntries=backup.gameState.diaryEntries;
-          if(backup.gameState.previousAffection)previousAffection=backup.gameState.previousAffection;
-          if(backup.gameState.dailyAffectionCap)dailyAffectionCap=backup.gameState.dailyAffectionCap;
-          if(backup.gameState.playerRole)playerRole=backup.gameState.playerRole;
-          if(backup.gameState.todayLocation){
-            todayLocation=Locations.find(l=>l.id===backup.gameState.todayLocation)||null;
-          }
+      if(gs){
+        currentDay=gs.currentDay||1;
+        todayLocation=gs.todayLocation?Locations.find(l=>l.id===gs.todayLocation)||null:null;
+        gameCharacters[1].affection=gs.affection||10;previousAffection=gs.previousAffection||10;
+        affectionGainedToday=gs.affectionGainedToday||0;diaryEntries=gs.diaryEntries||[];
+        dailyAffectionCap=gs.dailyAffectionCap||DEFAULT_DAILY_AFFECTION_CAP;
+        playerRole=gs.playerRole||'male';
+        // Restore day state from active chat
+        const st=sillytavernStore;
+        if(st.activeChat&&st.activeChat.messages.length>0){
+          dayStarted=true;messagesToday=st.activeChat.messages.filter(m=>m.role==='user').length;currentRound=Math.ceil(st.activeChat.messages.length/2);
+        }else{dayStarted=false;messagesToday=0;currentRound=0;}
+        roundHistory=[];
+      }
         }
         await sillytavernStore.loadAll();
         saveGameState();
