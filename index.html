@@ -3,712 +3,223 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>心之回响 — Heart's Echo · AI Edition</title>
+<title>心之回响 — Heart's Echo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-deep: #08081a;
-  --bg-surface: rgba(255,255,255,0.04);
-  --bg-glass: rgba(20,16,40,0.85);
-  --bg-glass-hover: rgba(30,24,55,0.92);
-  --border-glass: rgba(255,255,255,0.08);
-  --border-glow: rgba(255,107,157,0.25);
-  --accent-pink: #ff6b9d;
-  --accent-pink-soft: #ff8fb3;
-  --accent-lavender: #b388ff;
-  --accent-gold: #f0c060;
-  --accent-cyan: #64d8d8;
-  --text-primary: #f0e6ff;
-  --text-secondary: #b0a0cc;
-  --text-muted: #6e6088;
-  --shadow-glow: 0 0 40px rgba(255,107,157,0.15);
-  --shadow-card: 0 8px 32px rgba(0,0,0,0.3);
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-  --transition-fast: 0.2s cubic-bezier(0.4,0,0.2,1);
-  --transition-smooth: 0.4s cubic-bezier(0.4,0,0.2,1);
-  --transition-spring: 0.5s cubic-bezier(0.34,1.56,0.64,1);
-  --font-serif: 'Noto Serif SC', serif;
-  --font-sans: 'Noto Sans SC', system-ui, sans-serif;
+  --bg-deep:#08081a;--bg-glass:rgba(20,16,40,0.85);--bg-glass-hover:rgba(30,24,55,0.92);
+  --border-glass:rgba(255,255,255,0.08);--border-glow:rgba(255,107,157,0.25);
+  --accent-pink:#ff6b9d;--accent-pink-soft:#ff8fb3;--accent-lavender:#b388ff;--accent-gold:#f0c060;--accent-cyan:#64d8d8;
+  --text-primary:#f0e6ff;--text-secondary:#b0a0cc;--text-muted:#6e6088;
+  --shadow-glow:0 0 40px rgba(255,107,157,0.15);--shadow-card:0 8px 32px rgba(0,0,0,0.3);
+  --radius-sm:8px;--radius-md:14px;--radius-lg:20px;--radius-xl:28px;
+  --transition-fast:0.2s cubic-bezier(0.4,0,0.2,1);--transition-smooth:0.4s cubic-bezier(0.4,0,0.2,1);--transition-spring:0.5s cubic-bezier(0.34,1.56,0.64,1);
+  --font-serif:'Noto Serif SC',serif;--font-sans:'Noto Sans SC',system-ui,sans-serif;
 }
-
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-html { font-size:16px; scroll-behavior:smooth; }
-
-body {
-  font-family: var(--font-sans);
-  background: var(--bg-deep);
-  color: var(--text-primary);
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(255,107,157,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 70% at 80% 70%, rgba(179,136,255,0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(100,216,216,0.03) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-::-webkit-scrollbar { width:5px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:rgba(255,107,157,0.3); border-radius:3px; }
-
-#particles-canvas {
-  position:fixed; inset:0; z-index:0; pointer-events:none;
-}
-
-/* === App Shell === */
-#app-shell {
-  position:relative;
-  z-index:1;
-  max-width:1300px;
-  margin:0 auto;
-  padding:0 24px;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-}
-
-/* === Top Navigation === */
-.top-nav {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:18px 0;
-  position:sticky;
-  top:0;
-  z-index:100;
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  background:rgba(8,8,26,0.7);
-  border-bottom:1px solid var(--border-glass);
-  gap:12px;
-}
-
-.nav-brand {
-  font-family: var(--font-serif);
-  font-size:1.4rem;
-  font-weight:700;
-  background: linear-gradient(135deg, var(--accent-pink), var(--accent-lavender));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-  letter-spacing:0.06em;
-  cursor:pointer;
-  user-select:none;
-  transition: var(--transition-fast);
-}
-.nav-brand:hover {
-  background: linear-gradient(135deg, var(--accent-pink-soft), var(--accent-gold));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-
-.nav-links {
-  display:flex;
-  gap:4px;
-  background: var(--bg-glass);
-  border:1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  padding:4px;
-  flex:1;
-  justify-content:center;
-}
-
-.nav-link {
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-family: var(--font-sans);
-  font-size:0.85rem;
-  font-weight:500;
-  color: var(--text-secondary);
-  background:transparent;
-  border:none;
-  border-radius: var(--radius-md);
-  padding:9px 16px;
-  cursor:pointer;
-  transition: all var(--transition-fast);
-  white-space:nowrap;
-}
-.nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.06); }
-.nav-link.active {
-  color: var(--text-primary);
-  background: linear-gradient(135deg, rgba(255,107,157,0.2), rgba(179,136,255,0.15));
-  box-shadow: 0 0 20px rgba(255,107,157,0.1);
-}
-.nav-link.highlight {
-  border: 1px solid rgba(255,107,157,0.3);
-}
-
-.nav-link svg { width:16px; height:16px; flex-shrink:0; }
-
-.nav-actions { display:flex; gap:8px; align-items:center; }
-
-.nav-time {
-  font-family: var(--font-serif);
-  font-size:0.82rem;
-  color: var(--text-muted);
-  padding:7px 12px;
-  background: var(--bg-glass);
-  border:1px solid var(--border-glass);
-  border-radius: var(--radius-md);
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.nav-time svg { width:14px; height:14px; opacity:0.6; }
-
-.nav-icon-btn {
-  width:36px; height:36px;
-  border-radius:50%;
-  border:1px solid var(--border-glass);
-  background:var(--bg-glass);
-  color:var(--text-secondary);
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition: all var(--transition-fast);
-}
-.nav-icon-btn:hover { color:var(--text-primary); border-color:var(--border-glow); }
-.nav-icon-btn svg { width:18px; height:18px; }
-
-/* === Page Container === */
-#page-container { flex:1; position:relative; padding:24px 0 60px; }
-.page { display:none; animation: pageIn 0.5s cubic-bezier(0.4,0,0.2,1); }
-.page.active { display:block; }
-
-@keyframes pageIn {
-  from { opacity:0; transform:translateY(16px); }
-  to { opacity:1; transform:translateY(0); }
-}
-
-/* ========== HOME PAGE ========== */
-.hero-section { text-align:center; padding:48px 0 32px; }
-.hero-title {
-  font-family:var(--font-serif); font-size:3.2rem; font-weight:900;
-  background:linear-gradient(135deg,#ff6b9d 0%,#f0c060 30%,#b388ff 60%,#64d8d8 100%);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  letter-spacing:0.12em; margin-bottom:6px;
-  animation:titleShimmer 4s ease-in-out infinite; background-size:200% 200%;
-}
-@keyframes titleShimmer { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
-.hero-subtitle { font-family:var(--font-serif); font-size:1.05rem; color:var(--text-secondary); letter-spacing:0.15em; }
-.hero-tagline { font-size:0.85rem; color:var(--text-muted); letter-spacing:0.08em; margin-top:4px; }
-
-.protagonists-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:40px 0; }
-.protag-card {
-  background:var(--bg-glass); border:1px solid var(--border-glass);
-  border-radius:var(--radius-xl); padding:28px; cursor:pointer;
-  transition:all var(--transition-smooth); position:relative; overflow:hidden;
-}
-.protag-card::before { content:''; position:absolute; inset:0; border-radius:var(--radius-xl); opacity:0; transition:opacity var(--transition-smooth); z-index:0; }
-.protag-card.male::before { background:radial-gradient(circle at 30% 20%, rgba(100,216,216,0.08), transparent 70%); }
-.protag-card.female::before { background:radial-gradient(circle at 70% 20%, rgba(255,107,157,0.08), transparent 70%); }
-.protag-card:hover::before { opacity:1; }
-.protag-card:hover { transform:translateY(-4px); border-color:var(--border-glow); box-shadow:var(--shadow-glow); }
-.protag-card>*{position:relative;z-index:1;}
-.protag-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
-.protag-avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.8rem;border:2px solid var(--border-glass);}
-.protag-card.male .protag-avatar{background:linear-gradient(135deg,rgba(100,216,216,0.2),rgba(100,180,216,0.15));}
-.protag-card.female .protag-avatar{background:linear-gradient(135deg,rgba(255,107,157,0.2),rgba(255,143,179,0.15));}
-.protag-info h3{font-family:var(--font-serif);font-size:1.4rem;font-weight:700;margin-bottom:4px;}
-.protag-role{font-size:0.8rem;color:var(--text-secondary);letter-spacing:0.04em;}
-.protag-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.stat-item{background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:10px 14px;}
-.stat-label{font-size:0.72rem;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.04em;}
-.stat-value{font-family:var(--font-serif);font-size:1rem;font-weight:600;}
-.stat-bar-wrap{width:100%;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:6px;overflow:hidden;}
-.stat-bar-fill{height:100%;border-radius:2px;transition:width 1s cubic-bezier(0.4,0,0.2,1);}
-.stat-bar-fill.affection{background:linear-gradient(90deg,var(--accent-pink),var(--accent-gold));}
-.stat-bar-fill.progress{background:linear-gradient(90deg,var(--accent-cyan),var(--accent-lavender));}
-
-.quick-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px;}
-.quick-action-btn{
-  display:flex;align-items:center;gap:8px;
-  font-family:var(--font-sans);font-size:0.88rem;font-weight:500;
-  color:var(--text-primary);background:var(--bg-glass);
-  border:1px solid var(--border-glass);border-radius:var(--radius-lg);
-  padding:13px 22px;cursor:pointer;transition:all var(--transition-fast);
-}
-.quick-action-btn:hover{background:var(--bg-glass-hover);border-color:var(--border-glow);transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.2);}
-.quick-action-btn.primary{background:linear-gradient(135deg,rgba(255,107,157,0.25),rgba(179,136,255,0.12));border-color:rgba(255,107,157,0.3);}
-.quick-action-btn svg{width:18px;height:18px;flex-shrink:0;}
-
-/* ========== MAP PAGE ========== */
-.map-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
-.map-title{font-family:var(--font-serif);font-size:1.5rem;font-weight:700;display:flex;align-items:center;gap:10px;}
-.map-title svg{width:24px;height:24px;color:var(--accent-pink);}
-.map-controls{display:flex;gap:8px;}
-.map-control-btn{
-  display:flex;align-items:center;gap:5px;
-  font-family:var(--font-sans);font-size:0.8rem;font-weight:500;
-  color:var(--text-primary);background:var(--bg-glass);
-  border:1px solid var(--border-glass);border-radius:var(--radius-md);
-  padding:9px 14px;cursor:pointer;transition:all var(--transition-fast);
-}
-.map-control-btn:hover{background:var(--bg-glass-hover);border-color:var(--border-glow);}
-.map-control-btn.expand{background:linear-gradient(135deg,rgba(255,107,157,0.2),rgba(179,136,255,0.1));border-color:rgba(255,107,157,0.3);}
-.map-control-btn svg{width:14px;height:14px;}
-
-.map-grid{display:grid;gap:14px;padding:8px;}
-.map-grid.size-2{grid-template-columns:repeat(2,1fr);}
-.map-grid.size-3{grid-template-columns:repeat(3,1fr);}
-.map-grid.size-4{grid-template-columns:repeat(4,1fr);}
-.map-grid.size-5{grid-template-columns:repeat(5,1fr);}
-
-.map-cell{
-  aspect-ratio:1;min-height:170px;
-  background:var(--bg-glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  border:1px solid var(--border-glass);border-radius:var(--radius-lg);
-  padding:18px;cursor:pointer;transition:all var(--transition-smooth);
-  display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;
-}
-.map-cell::after{content:'';position:absolute;inset:0;border-radius:var(--radius-lg);opacity:0;transition:opacity var(--transition-smooth);pointer-events:none;}
-.map-cell:hover{transform:translateY(-3px) scale(1.02);border-color:var(--border-glow);box-shadow:var(--shadow-glow);z-index:2;}
-.map-cell:hover::after{opacity:1;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,107,157,0.08),transparent 70%);}
-.map-cell.occupied{border-color:rgba(255,107,157,0.2);}
-.map-cell.empty{opacity:0.5;cursor:default;}
-.map-cell.empty:hover{transform:none;border-color:var(--border-glass);box-shadow:none;}
-.map-cell.empty:hover::after{opacity:0;}
-.map-cell.add-slot{border-style:dashed;border-color:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;opacity:0.6;}
-.map-cell.add-slot:hover{opacity:1;border-color:var(--accent-lavender);transform:translateY(-3px) scale(1.02);}
-
-.add-place-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px dashed rgba(255,255,255,0.25);color:var(--text-muted);transition:all var(--transition-spring);}
-.add-place-icon svg{width:18px;height:18px;transition:transform var(--transition-spring);}
-.map-cell.add-slot:hover .add-place-icon{border-color:var(--accent-lavender);color:var(--accent-lavender);border-style:solid;box-shadow:0 0 20px rgba(179,136,255,0.15);}
-.map-cell.add-slot:hover .add-place-icon svg{transform:rotate(90deg);}
-
-.location-name{font-family:var(--font-serif);font-size:1.1rem;font-weight:700;margin-bottom:4px;}
-.location-desc{font-size:0.76rem;color:var(--text-secondary);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.location-chars{display:flex;gap:5px;margin-top:8px;}
-.char-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;border:2px solid var(--border-glass);}
-.char-dot.male{background:rgba(100,216,216,0.25);color:var(--accent-cyan);}
-.char-dot.female{background:rgba(255,107,157,0.25);color:var(--accent-pink);}
-
-/* ========== STORY PAGE ========== */
-.story-header{margin-bottom:24px;}
-.story-title{font-family:var(--font-serif);font-size:1.5rem;font-weight:700;display:flex;align-items:center;gap:10px;}
-.story-title svg{width:24px;height:24px;color:var(--accent-gold);}
-.story-chapter{font-size:0.82rem;color:var(--text-muted);margin-top:4px;}
-
-.timeline{position:relative;padding-left:28px;}
-.timeline::before{content:'';position:absolute;left:9px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--accent-pink),var(--accent-lavender),transparent);}
-.timeline-item{
-  position:relative;margin-bottom:28px;padding:18px 22px;
-  background:var(--bg-glass);border:1px solid var(--border-glass);
-  border-radius:var(--radius-lg);transition:all var(--transition-fast);cursor:pointer;overflow:hidden;
-}
-.timeline-item::after{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(255,107,157,0.08),transparent);transition:width var(--transition-smooth);}
-.timeline-item:hover{border-color:var(--border-glow);box-shadow:0 4px 16px rgba(0,0,0,0.2);transform:translateX(4px);}
-.timeline-item:hover::after{width:100%;}
-.timeline-item::before{content:'';position:absolute;left:-24px;top:24px;width:10px;height:10px;border-radius:50%;background:var(--accent-pink);border:3px solid var(--bg-deep);box-shadow:0 0 10px rgba(255,107,157,0.4);}
-.timeline-time{font-size:0.76rem;color:var(--text-muted);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
-.timeline-time svg{width:13px;height:13px;}
-.timeline-ep-title{font-family:var(--font-serif);font-size:1rem;font-weight:600;margin-bottom:6px;}
-.timeline-preview{font-size:0.83rem;color:var(--text-secondary);line-height:1.6;}
-.timeline-location{font-size:0.76rem;color:var(--text-muted);margin-top:8px;display:flex;align-items:center;gap:5px;}
-.timeline-location svg{width:13px;height:13px;}
-
-/* ========== CHARACTERS PAGE ========== */
-.chars-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
-.char-profile-card{
-  background:var(--bg-glass);border:1px solid var(--border-glass);
-  border-radius:var(--radius-xl);padding:24px;cursor:pointer;
-  transition:all var(--transition-smooth);position:relative;overflow:hidden;
-}
-.char-profile-card::before{content:'';position:absolute;inset:0;border-radius:var(--radius-xl);opacity:0;transition:opacity var(--transition-smooth);pointer-events:none;}
-.char-profile-card.male::before{background:radial-gradient(circle at 30% 20%,rgba(100,216,216,0.06),transparent 70%);}
-.char-profile-card.female::before{background:radial-gradient(circle at 70% 20%,rgba(255,107,157,0.06),transparent 70%);}
-.char-profile-card:hover::before{opacity:1;}
-.char-profile-card:hover{transform:translateY(-3px);border-color:var(--border-glow);box-shadow:var(--shadow-card);}
-.char-profile-top{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
-.char-profile-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem;font-weight:700;border:2px solid var(--border-glass);}
-.char-profile-avatar.male{background:rgba(100,216,216,0.2);}
-.char-profile-avatar.female{background:rgba(255,107,157,0.2);}
-.char-profile-name{font-family:var(--font-serif);font-size:1.15rem;font-weight:700;}
-.char-profile-trait{font-size:0.76rem;color:var(--text-muted);margin-top:2px;}
-.char-detail-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
-.char-detail-label{font-size:0.78rem;color:var(--text-muted);}
-.char-detail-value{font-size:0.83rem;font-weight:500;}
-.char-affection-bar{width:100%;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;margin-top:14px;overflow:hidden;}
-.char-affection-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);}
-.char-affection-fill.high{background:linear-gradient(90deg,var(--accent-pink),var(--accent-gold));}
-.char-affection-fill.medium{background:linear-gradient(90deg,var(--accent-cyan),var(--accent-lavender));}
-.char-affection-label{display:flex;justify-content:space-between;margin-top:6px;font-size:0.73rem;color:var(--text-muted);}
-
-/* ========== GAME PAGE (LLM Interaction) ========== */
-.game-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;height:calc(100vh - 140px);min-height:600px;}
-
-.game-main{
-  display:flex;flex-direction:column;
-  background:var(--bg-glass);border:1px solid var(--border-glass);
-  border-radius:var(--radius-xl);overflow:hidden;
-}
-
-.game-scene-header{
-  padding:16px 24px;
-  border-bottom:1px solid var(--border-glass);
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,0.02);
-}
-
-.game-scene-title{
-  font-family:var(--font-serif);font-size:1.1rem;font-weight:600;
-  display:flex;align-items:center;gap:8px;
-}
-.game-scene-title svg{width:18px;height:18px;color:var(--accent-gold);}
-
-.game-scene-info{font-size:0.78rem;color:var(--text-muted);}
-
-.game-text-area{
-  flex:1;overflow-y:auto;padding:24px 28px;
-  display:flex;flex-direction:column;gap:16px;
-}
-
-.game-msg{
-  animation:msgIn 0.4s cubic-bezier(0.4,0,0.2,1);
-  padding:16px 20px;
-  border-radius:var(--radius-md);
-  line-height:1.9;
-  font-size:0.95rem;
-}
-
-@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-
-.game-msg.user{
-  align-self:flex-end;
-  max-width:75%;
-  background:linear-gradient(135deg,rgba(100,216,216,0.15),rgba(100,180,216,0.08));
-  border:1px solid rgba(100,216,216,0.2);
-  color:var(--text-primary);
-}
-
-.game-msg.assistant{
-  align-self:flex-start;
-  max-width:85%;
-  background:rgba(255,255,255,0.03);
-  border:1px solid var(--border-glass);
-}
-
-.game-msg .msg-role{
-  font-size:0.72rem;font-weight:600;color:var(--text-muted);
-  margin-bottom:6px;letter-spacing:0.04em;
-}
-
-.game-msg .msg-thinking-toggle{
-  font-size:0.78rem;color:var(--accent-lavender);cursor:pointer;
-  padding:6px 12px;background:rgba(179,136,255,0.08);
-  border-radius:var(--radius-sm);display:inline-block;
-  margin-top:8px;transition:all var(--transition-fast);
-}
-.game-msg .msg-thinking-toggle:hover{background:rgba(179,136,255,0.15);}
-
-.game-msg .msg-thinking-content{
-  margin-top:8px;padding:12px 16px;
-  background:rgba(179,136,255,0.06);border-left:2px solid var(--accent-lavender);
-  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  font-size:0.83rem;color:var(--text-secondary);line-height:1.7;
-  display:none;
-}
-.game-msg .msg-thinking-content.open{display:block;}
-
-.game-options-area{
-  padding:16px 24px;
-  border-top:1px solid var(--border-glass);
-  display:flex;flex-wrap:wrap;gap:10px;
-  background:rgba(255,255,255,0.02);
-}
-
-.game-option-btn{
-  font-family:var(--font-sans);font-size:0.85rem;font-weight:500;
-  padding:10px 20px;border-radius:var(--radius-md);
-  cursor:pointer;transition:all var(--transition-fast);
-  border:1px solid var(--border-glass);
-  background:var(--bg-glass);color:var(--text-primary);
-  position:relative;overflow:hidden;
-}
-.game-option-btn::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(255,107,157,0.2),rgba(179,136,255,0.1));
-  opacity:0;transition:opacity var(--transition-fast);
-}
-.game-option-btn:hover::before{opacity:1;}
-.game-option-btn:hover{
-  border-color:var(--border-glow);transform:translateY(-2px);
-  box-shadow:0 4px 16px rgba(0,0,0,0.25);
-}
-
-.game-input-area{
-  padding:14px 24px;
-  border-top:1px solid var(--border-glass);
-  display:flex;gap:10px;
-  background:rgba(0,0,0,0.2);
-}
-
-.game-input{
-  flex:1;
-  font-family:var(--font-sans);font-size:0.88rem;
-  color:var(--text-primary);background:rgba(255,255,255,0.05);
-  border:1px solid var(--border-glass);border-radius:var(--radius-sm);
-  padding:12px 16px;outline:none;transition:all var(--transition-fast);
-}
-.game-input:focus{border-color:var(--accent-lavender);box-shadow:0 0 0 3px rgba(179,136,255,0.08);}
-
-.game-send-btn{
-  font-family:var(--font-sans);font-size:0.85rem;font-weight:600;
-  padding:0 20px;border-radius:var(--radius-sm);
-  cursor:pointer;transition:all var(--transition-fast);white-space:nowrap;
-  border:none;
-  background:linear-gradient(135deg,var(--accent-pink),var(--accent-lavender));
-  color:#fff;
-}
-.game-send-btn:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,107,157,0.3);}
-.game-send-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
-
-/* Game Sidebar */
-.game-sidebar{
-  display:flex;flex-direction:column;gap:14px;
-}
-
-.sidebar-panel{
-  background:var(--bg-glass);border:1px solid var(--border-glass);
-  border-radius:var(--radius-lg);padding:18px;
-}
-
-.sidebar-panel-title{
-  font-family:var(--font-serif);font-size:0.85rem;font-weight:700;
-  color:var(--text-secondary);margin-bottom:12px;
-  letter-spacing:0.04em;display:flex;align-items:center;gap:6px;
-}
-.sidebar-panel-title svg{width:15px;height:15px;}
-
-.var-list{display:flex;flex-direction:column;gap:6px;}
-.var-row{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);font-size:0.8rem;}
-.var-name{color:var(--text-muted);}
-.var-value{font-weight:600;}
-
-.sum-text{font-size:0.82rem;color:var(--text-secondary);line-height:1.6;}
-
-.chat-session-list{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;}
-.chat-session-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 12px;border-radius:var(--radius-sm);
-  font-size:0.8rem;cursor:pointer;transition:all var(--transition-fast);
-  background:transparent;
-}
-.chat-session-item:hover{background:rgba(255,255,255,0.04);}
-.chat-session-item.active{background:rgba(255,107,157,0.12);color:var(--accent-pink);}
-.chat-session-item .session-del-btn{
-  width:22px;height:22px;border-radius:50%;border:none;
-  background:transparent;color:var(--text-muted);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:0.7rem;
-  opacity:0;transition:all var(--transition-fast);
-}
-.chat-session-item:hover .session-del-btn{opacity:1;}
-.chat-session-item .session-del-btn:hover{background:rgba(255,80,80,0.2);color:#ff5050;}
-
-/* ========== MODALS ========== */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.65);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  z-index:500;display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity var(--transition-smooth);
-}
-.modal-overlay.open{opacity:1;pointer-events:auto;}
-
-.modal-panel{
-  background:var(--bg-glass);border:1px solid var(--border-glass);
-  border-radius:var(--radius-xl);max-width:620px;width:92%;
-  max-height:85vh;overflow-y:auto;
-  transform:translateY(20px) scale(0.96);
-  transition:transform var(--transition-spring);
-  box-shadow:0 20px 60px rgba(0,0,0,0.5);
-}
-.modal-panel.wide{max-width:800px;}
-.modal-overlay.open .modal-panel{transform:translateY(0) scale(1);}
-
-.modal-header{
-  padding:24px 24px 0;
-  display:flex;align-items:flex-start;justify-content:space-between;
-}
-.modal-title{font-family:var(--font-serif);font-size:1.35rem;font-weight:700;}
-.modal-subtitle{font-size:0.8rem;color:var(--text-muted);margin-top:4px;}
-.modal-close{
-  width:34px;height:34px;border-radius:50%;
-  border:1px solid var(--border-glass);background:transparent;
-  color:var(--text-secondary);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all var(--transition-fast);flex-shrink:0;
-}
-.modal-close:hover{background:rgba(255,255,255,0.08);color:var(--text-primary);}
-.modal-body{padding:20px 24px 24px;}
-
-/* Form elements */
-.form-group{margin-bottom:14px;}
-.form-label{font-size:0.78rem;color:var(--text-secondary);margin-bottom:5px;display:block;letter-spacing:0.03em;}
-.form-input,.form-textarea{
-  width:100%;font-family:var(--font-sans);font-size:0.87rem;
-  color:var(--text-primary);background:rgba(255,255,255,0.05);
-  border:1px solid var(--border-glass);border-radius:var(--radius-sm);
-  padding:10px 14px;transition:all var(--transition-fast);outline:none;
-}
-.form-input:focus,.form-textarea:focus{border-color:var(--accent-lavender);box-shadow:0 0 0 3px rgba(179,136,255,0.1);}
-.form-textarea{resize:vertical;min-height:70px;line-height:1.6;}
-.form-select{
-  width:100%;font-family:var(--font-sans);font-size:0.87rem;
-  color:var(--text-primary);background:rgba(255,255,255,0.05);
-  border:1px solid var(--border-glass);border-radius:var(--radius-sm);
-  padding:10px 14px;cursor:pointer;outline:none;transition:all var(--transition-fast);
-}
-.form-select:focus{border-color:var(--accent-lavender);}
-
-.modal-actions{display:flex;gap:10px;flex-wrap:wrap;}
-.modal-action-btn{
-  display:flex;align-items:center;gap:6px;
-  font-family:var(--font-sans);font-size:0.82rem;font-weight:500;
-  padding:9px 16px;border-radius:var(--radius-sm);
-  cursor:pointer;transition:all var(--transition-fast);
-  border:1px solid var(--border-glass);
-  background:var(--bg-glass);color:var(--text-primary);
-}
-.modal-action-btn:hover{background:var(--bg-glass-hover);border-color:var(--border-glow);transform:translateY(-1px);}
-.modal-action-btn.primary{background:linear-gradient(135deg,rgba(255,107,157,0.3),rgba(179,136,255,0.15));border-color:rgba(255,107,157,0.3);}
-.modal-action-btn.danger{color:#ff7070;border-color:rgba(255,100,100,0.3);}
-.modal-action-btn.danger:hover{background:rgba(255,80,80,0.15);}
-.modal-action-btn.small{padding:6px 12px;font-size:0.75rem;}
-
-/* Tabs */
-.tab-bar{display:flex;gap:2px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:3px;margin-bottom:18px;}
-.tab-btn{
-  flex:1;font-family:var(--font-sans);font-size:0.8rem;font-weight:500;
-  padding:8px 12px;border:none;border-radius:var(--radius-sm);
-  background:transparent;color:var(--text-secondary);cursor:pointer;
-  transition:all var(--transition-fast);text-align:center;
-}
-.tab-btn:hover{color:var(--text-primary);}
-.tab-btn.active{background:rgba(255,107,157,0.2);color:var(--accent-pink-soft);}
-.tab-panel{display:none;}
-.tab-panel.active{display:block;}
-
-/* Checklist */
-.checklist{display:flex;flex-direction:column;gap:4px;max-height:160px;overflow-y:auto;}
-.checklist-item{
-  display:flex;align-items:center;gap:8px;padding:6px 10px;
-  border-radius:var(--radius-sm);font-size:0.82rem;cursor:pointer;
-  transition:all var(--transition-fast);
-}
-.checklist-item:hover{background:rgba(255,255,255,0.04);}
-.checklist-item input[type=checkbox]{accent-color:var(--accent-pink);cursor:pointer;}
-
-/* Item list */
-.item-list{display:flex;flex-direction:column;gap:6px;}
-.item-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 14px;background:rgba(255,255,255,0.03);
-  border-radius:var(--radius-sm);transition:all var(--transition-fast);
-}
-.item-row:hover{background:rgba(255,255,255,0.06);}
-.item-name{font-size:0.85rem;font-weight:500;flex:1;}
-.item-meta{font-size:0.73rem;color:var(--text-muted);margin-left:10px;}
-.item-actions{display:flex;gap:4px;}
-
-/* Status badge */
-.status-badge{
-  display:inline-block;font-size:0.7rem;font-weight:600;
-  padding:3px 10px;border-radius:10px;
-}
-.status-badge.ok{background:rgba(100,216,150,0.15);color:#64d896;}
-.status-badge.warn{background:rgba(240,192,96,0.15);color:var(--accent-gold);}
-.status-badge.err{background:rgba(255,100,100,0.15);color:#ff6464;}
-
-/* Toast */
-.toast-container{
-  position:fixed;top:20px;right:20px;z-index:1000;
-  display:flex;flex-direction:column;gap:8px;pointer-events:none;
-}
-.toast{
-  display:flex;align-items:center;gap:10px;
-  background:rgba(20,16,40,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border:1px solid var(--border-glass);border-radius:var(--radius-md);
-  padding:12px 18px;pointer-events:auto;
-  transform:translateX(120%);opacity:0;
-  transition:all var(--transition-spring);
-  box-shadow:0 8px 32px rgba(0,0,0,0.4);
-  min-width:260px;
-}
-.toast.visible{transform:translateX(0);opacity:1;}
-.toast-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.toast-icon.success{background:rgba(100,216,150,0.2);color:#64d896;}
-.toast-icon.info{background:rgba(100,216,216,0.2);color:var(--accent-cyan);}
-.toast-icon.warning{background:rgba(240,192,96,0.2);color:var(--accent-gold);}
-.toast-message{font-size:0.83rem;flex:1;}
-.toast-close{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;transition:color var(--transition-fast);}
-.toast-close:hover{color:var(--text-primary);}
-
-/* Confirm */
-.confirm-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.5);
-  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
-  z-index:600;display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity var(--transition-smooth);
-}
-.confirm-overlay.open{opacity:1;pointer-events:auto;}
-.confirm-panel{
-  background:var(--bg-glass);border:1px solid var(--border-glass);
-  border-radius:var(--radius-lg);padding:24px;max-width:380px;width:90%;
-  transform:translateY(20px);transition:transform var(--transition-spring);
-}
-.confirm-overlay.open .confirm-panel{transform:translateY(0);}
-.confirm-message{font-size:0.92rem;margin-bottom:18px;line-height:1.6;}
-.confirm-buttons{display:flex;gap:8px;justify-content:flex-end;}
-.confirm-btn{
-  font-family:var(--font-sans);font-size:0.82rem;font-weight:500;
-  padding:9px 18px;border-radius:var(--radius-sm);cursor:pointer;
-  transition:all var(--transition-fast);border:1px solid var(--border-glass);
-}
-.confirm-btn.cancel{background:transparent;color:var(--text-secondary);}
-.confirm-btn.confirm-action{background:linear-gradient(135deg,rgba(255,107,157,0.4),rgba(179,136,255,0.2));border-color:rgba(255,107,157,0.3);color:var(--text-primary);}
-
-/* Empty state */
-.empty-state{
-  text-align:center;padding:40px 20px;color:var(--text-muted);
-}
-.empty-state svg{width:40px;height:40px;margin-bottom:12px;opacity:0.4;}
-.empty-state p{font-size:0.85rem;}
-
-/* Loading dots */
-.loading-dots{display:flex;gap:6px;align-items:center;padding:8px 0;}
-.loading-dots span{width:8px;height:8px;border-radius:50%;background:var(--accent-pink);animation:dotBounce 1.4s infinite ease-in-out both;}
-.loading-dots span:nth-child(2){animation-delay:0.16s;}
-.loading-dots span:nth-child(3){animation-delay:0.32s;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 20%,rgba(255,107,157,0.06)0%,transparent 60%),radial-gradient(ellipse 60% 70% at 80% 70%,rgba(179,136,255,0.05)0%,transparent 60%),radial-gradient(ellipse 50% 50% at 50% 50%,rgba(100,216,216,0.03)0%,transparent 60%);pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,107,157,0.3);border-radius:3px}
+#particles-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+#app-shell{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 24px;min-height:100vh;display:flex;flex-direction:column}
+.top-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:rgba(8,8,26,0.7);border-bottom:1px solid var(--border-glass);gap:10px}
+.nav-brand{font-family:var(--font-serif);font-size:1.35rem;font-weight:700;background:linear-gradient(135deg,var(--accent-pink),var(--accent-lavender));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.06em;cursor:pointer;user-select:none}
+.nav-links{display:flex;gap:3px;background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);padding:3px;flex:1;justify-content:center}
+.nav-link{display:flex;align-items:center;gap:5px;font-family:var(--font-sans);font-size:0.83rem;font-weight:500;color:var(--text-secondary);background:transparent;border:none;border-radius:var(--radius-md);padding:8px 14px;cursor:pointer;transition:all var(--transition-fast);white-space:nowrap}
+.nav-link:hover{color:var(--text-primary);background:rgba(255,255,255,0.06)}
+.nav-link.active{color:var(--text-primary);background:linear-gradient(135deg,rgba(255,107,157,0.2),rgba(179,136,255,0.15));box-shadow:0 0 20px rgba(255,107,157,0.1)}
+.nav-link.highlight{border:1px solid rgba(255,107,157,0.3)}
+.nav-link svg{width:15px;height:15px;flex-shrink:0}
+.nav-actions{display:flex;gap:6px;align-items:center}
+.nav-icon-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border-glass);background:var(--bg-glass);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition-fast)}
+.nav-icon-btn:hover{color:var(--text-primary);border-color:var(--border-glow)}
+.nav-icon-btn svg{width:17px;height:17px}
+#page-container{flex:1;position:relative;padding:20px 0 60px}
+.page{display:none;animation:pageIn 0.4s cubic-bezier(0.4,0,0.2,1)}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== HOME ===== */
+.home-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:10px}
+.home-left{display:flex;flex-direction:column;gap:20px}
+.home-status-card{background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-xl);padding:28px}
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.status-item{background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:14px 16px}
+.status-label{font-size:0.72rem;color:var(--text-muted);margin-bottom:4px;letter-spacing:0.04em}
+.status-value{font-family:var(--font-serif);font-size:1.15rem;font-weight:700}
+.status-value.highlight{color:var(--accent-pink)}
+.day-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(255,107,157,0.2),rgba(240,192,96,0.12));border:1px solid rgba(255,107,157,0.2);border-radius:var(--radius-md);padding:6px 14px;font-size:0.82rem;font-weight:600;margin-top:6px}
+.affection-gauge{margin-top:16px}
+.affection-bar-wrap{width:100%;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin:8px 0}
+.affection-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent-pink),var(--accent-gold));transition:width 1s cubic-bezier(0.4,0,0.2,1)}
+.affection-meta{display:flex;justify-content:space-between;font-size:0.76rem;color:var(--text-muted)}
+.affection-ladder{display:flex;gap:2px;margin-top:6px}
+.ladder-step{flex:1;text-align:center;font-size:0.65rem;color:var(--text-muted);padding:4px 2px;border-radius:4px;transition:all var(--transition-fast)}
+.ladder-step.active{background:rgba(255,107,157,0.2);color:var(--accent-pink-soft);font-weight:600}
+.home-right{display:flex;flex-direction:column;gap:14px}
+.home-action-card{background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-xl);padding:24px;text-align:center;cursor:pointer;transition:all var(--transition-smooth)}
+.home-action-card:hover{border-color:var(--border-glow);transform:translateY(-2px);box-shadow:var(--shadow-glow)}
+.home-action-card h3{font-family:var(--font-serif);font-size:1.2rem;margin-bottom:8px}
+.home-action-card p{font-size:0.82rem;color:var(--text-secondary);line-height:1.6}
+.home-action-card.primary{background:linear-gradient(135deg,rgba(255,107,157,0.15),rgba(179,136,255,0.08));border-color:rgba(255,107,157,0.25)}
+.hero-title{font-family:var(--font-serif);font-size:2.6rem;font-weight:900;background:linear-gradient(135deg,#ff6b9d 0%,#f0c060 30%,#b388ff 60%,#64d8d8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.1em;text-align:center;margin-bottom:4px;animation:titleShimmer 4s ease-in-out infinite;background-size:200% 200%}
+@keyframes titleShimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hero-subtitle{text-align:center;font-family:var(--font-serif);font-size:0.9rem;color:var(--text-secondary);letter-spacing:0.12em;margin-bottom:24px}
+
+/* ===== MAP ===== */
+.map-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.map-title{font-family:var(--font-serif);font-size:1.4rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.map-title svg{width:22px;height:22px;color:var(--accent-pink)}
+.map-hint{font-size:0.8rem;color:var(--text-muted);margin-top:4px}
+.map-grid{display:grid;gap:14px;padding:8px}
+.map-grid.size-2{grid-template-columns:repeat(2,1fr)}.map-grid.size-3{grid-template-columns:repeat(3,1fr)}.map-grid.size-4{grid-template-columns:repeat(4,1fr)}
+.map-cell{aspect-ratio:1;min-height:170px;background:var(--bg-glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--border-glass);border-radius:var(--radius-lg);padding:18px;cursor:pointer;transition:all var(--transition-smooth);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.map-cell:hover{transform:translateY(-3px) scale(1.02);border-color:var(--border-glow);box-shadow:var(--shadow-glow);z-index:2}
+.map-cell.selected{border-color:var(--accent-pink);border-width:2px;box-shadow:0 0 30px rgba(255,107,157,0.2)}
+.map-cell.selected::before{content:'已选';position:absolute;top:10px;right:10px;background:rgba(255,107,157,0.3);color:var(--accent-pink-soft);font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:10px;z-index:2}
+.map-cell.occupied{border-color:rgba(255,107,157,0.2)}
+.location-name{font-family:var(--font-serif);font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.location-desc{font-size:0.76rem;color:var(--text-secondary);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.location-chars{display:flex;gap:5px;margin-top:8px}
+.char-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;border:2px solid var(--border-glass)}
+.char-dot.male{background:rgba(100,216,216,0.25);color:var(--accent-cyan)}.char-dot.female{background:rgba(255,107,157,0.25);color:var(--accent-pink)}
+
+/* ===== DIARY ===== */
+.diary-header{margin-bottom:20px}.diary-title{font-family:var(--font-serif);font-size:1.4rem;font-weight:700;display:flex;align-items:center;gap:8px}.diary-title svg{width:22px;height:22px;color:var(--accent-gold)}
+.diary-entries{display:flex;flex-direction:column;gap:12px}
+.diary-entry{background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);padding:18px 20px;transition:all var(--transition-fast)}
+.diary-entry:hover{border-color:var(--border-glow)}
+.diary-entry-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.diary-day{font-family:var(--font-serif);font-size:0.95rem;font-weight:700;color:var(--accent-gold)}
+.diary-location{font-size:0.78rem;color:var(--text-muted)}
+.diary-summary{font-size:0.85rem;color:var(--text-secondary);line-height:1.7}
+.diary-affection{font-size:0.76rem;color:var(--accent-pink-soft);margin-top:8px}
+.diary-empty{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.diary-empty svg{width:48px;height:48px;margin-bottom:12px;opacity:0.3}
+.diary-event{border-color:rgba(255,107,157,0.3);background:rgba(255,107,157,0.05)}
+.diary-event .diary-day{color:var(--accent-pink)}
+
+/* ===== CHARACTERS ===== */
+.chars-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.char-card{background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-xl);padding:24px;position:relative;overflow:hidden}
+.char-card:hover{border-color:var(--border-glow)}
+.char-card-top{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.char-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.3rem;font-weight:700;border:2px solid var(--border-glass)}
+.char-avatar.male{background:rgba(100,216,216,0.2)}.char-avatar.female{background:rgba(255,107,157,0.2)}
+.char-name{font-family:var(--font-serif);font-size:1.2rem;font-weight:700}.char-role{font-size:0.76rem;color:var(--text-muted);margin-top:2px}
+.char-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem}
+.char-row-label{color:var(--text-muted)}.char-row-value{font-weight:500}
+.char-affection-bar{width:100%;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;margin:12px 0 6px;overflow:hidden}
+.char-affection-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent-pink),var(--accent-gold));transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
+.char-affection-num{display:flex;justify-content:space-between;font-size:0.73rem;color:var(--text-muted);margin-bottom:8px}
+
+/* ===== GAME PAGE ===== */
+.game-layout{display:grid;grid-template-columns:1fr 300px;gap:18px;height:calc(100vh - 150px);min-height:550px}
+.game-main{display:flex;flex-direction:column;background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-xl);overflow:hidden}
+.game-scene-header{padding:14px 20px;border-bottom:1px solid var(--border-glass);display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.02)}
+.game-scene-title{font-family:var(--font-serif);font-size:1rem;font-weight:600;display:flex;align-items:center;gap:6px}
+.game-scene-title svg{width:16px;height:16px;color:var(--accent-gold)}
+.game-day-info{font-size:0.76rem;color:var(--text-muted);display:flex;align-items:center;gap:10px}
+.game-msg-counter{font-size:0.72rem;color:var(--text-muted)}
+.game-msg-counter.warning{color:var(--accent-gold)}
+.game-text-area{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+.game-msg{animation:msgIn 0.35s cubic-bezier(0.4,0,0.2,1);padding:14px 18px;border-radius:var(--radius-md);line-height:1.85;font-size:0.92rem;position:relative}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.game-msg.user{align-self:flex-end;max-width:72%;background:linear-gradient(135deg,rgba(100,216,216,0.15),rgba(100,180,216,0.08));border:1px solid rgba(100,216,216,0.2);color:var(--text-primary)}
+.game-msg.assistant{align-self:flex-start;max-width:88%;background:rgba(255,255,255,0.03);border:1px solid var(--border-glass)}
+.game-msg .msg-role{font-size:0.7rem;font-weight:600;color:var(--accent-pink);margin-bottom:4px;letter-spacing:0.04em}
+.game-msg .msg-thinking-toggle{font-size:0.76rem;color:var(--accent-lavender);cursor:pointer;padding:5px 10px;background:rgba(179,136,255,0.08);border-radius:var(--radius-sm);display:inline-block;margin-top:6px;transition:all var(--transition-fast)}
+.game-msg .msg-thinking-toggle:hover{background:rgba(179,136,255,0.15)}
+.game-msg .msg-thinking-content{margin-top:6px;padding:10px 14px;background:rgba(179,136,255,0.06);border-left:2px solid var(--accent-lavender);border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:0.8rem;color:var(--text-secondary);line-height:1.65;display:none}
+.game-msg .msg-thinking-content.open{display:block}
+.game-options-area{padding:14px 20px;border-top:1px solid var(--border-glass);display:flex;flex-wrap:wrap;gap:8px;background:rgba(255,255,255,0.02)}
+.game-option-btn{font-family:var(--font-sans);font-size:0.82rem;font-weight:500;padding:9px 18px;border-radius:var(--radius-md);cursor:pointer;transition:all var(--transition-fast);border:1px solid var(--border-glass);background:var(--bg-glass);color:var(--text-primary);position:relative;overflow:hidden}
+.game-option-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,107,157,0.2),rgba(179,136,255,0.1));opacity:0;transition:opacity var(--transition-fast)}
+.game-option-btn:hover::before{opacity:1}.game-option-btn:hover{border-color:var(--border-glow);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.25)}
+.game-input-area{padding:12px 20px;border-top:1px solid var(--border-glass);display:flex;gap:8px;align-items:center;background:rgba(0,0,0,0.2)}
+.game-input{flex:1;font-family:var(--font-sans);font-size:0.86rem;color:var(--text-primary);background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);border-radius:var(--radius-sm);padding:10px 14px;outline:none;transition:all var(--transition-fast)}
+.game-input:focus{border-color:var(--accent-lavender);box-shadow:0 0 0 3px rgba(179,136,255,0.08)}
+.game-send-btn{font-family:var(--font-sans);font-size:0.83rem;font-weight:600;padding:10px 18px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition-fast);white-space:nowrap;border:none;background:linear-gradient(135deg,var(--accent-pink),var(--accent-lavender));color:#fff}
+.game-send-btn:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,107,157,0.3)}
+.game-send-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.game-send-btn.end{background:linear-gradient(135deg,rgba(240,192,96,0.8),rgba(255,140,80,0.8));font-size:0.78rem}
+.game-send-btn.end:hover{box-shadow:0 4px 16px rgba(240,192,96,0.3)}
+.game-sidebar{display:flex;flex-direction:column;gap:12px}
+.sidebar-panel{background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);padding:16px}
+.sidebar-panel-title{font-family:var(--font-serif);font-size:0.8rem;font-weight:700;color:var(--text-secondary);margin-bottom:10px;letter-spacing:0.03em;display:flex;align-items:center;gap:5px}
+.sidebar-panel-title svg{width:14px;height:14px}
+.var-list{display:flex;flex-direction:column;gap:5px}.var-row{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);font-size:0.78rem}.var-name{color:var(--text-muted)}.var-value{font-weight:600}
+.sum-text{font-size:0.8rem;color:var(--text-secondary);line-height:1.6}
+.chat-session-list{display:flex;flex-direction:column;gap:3px;max-height:180px;overflow-y:auto}
+.chat-session-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:var(--radius-sm);font-size:0.78rem;cursor:pointer;transition:all var(--transition-fast);background:transparent}
+.chat-session-item:hover{background:rgba(255,255,255,0.04)}.chat-session-item.active{background:rgba(255,107,157,0.12);color:var(--accent-pink)}
+.chat-session-item .session-del-btn{width:20px;height:20px;border-radius:50%;border:none;background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:all var(--transition-fast)}
+.chat-session-item:hover .session-del-btn{opacity:1}.chat-session-item .session-del-btn:hover{background:rgba(255,80,80,0.2);color:#ff5050}
+
+/* ===== MODALS ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity var(--transition-smooth)}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal-panel{background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-xl);max-width:580px;width:92%;max-height:85vh;overflow-y:auto;transform:translateY(20px) scale(0.96);transition:transform var(--transition-spring);box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.modal-panel.wide{max-width:760px}
+.modal-overlay.open .modal-panel{transform:translateY(0) scale(1)}
+.modal-header{padding:22px 22px 0;display:flex;align-items:flex-start;justify-content:space-between}
+.modal-title{font-family:var(--font-serif);font-size:1.3rem;font-weight:700}.modal-subtitle{font-size:0.78rem;color:var(--text-muted);margin-top:3px}
+.modal-close{width:32px;height:32px;border-radius:50%;border:1px solid var(--border-glass);background:transparent;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition-fast);flex-shrink:0}
+.modal-close:hover{background:rgba(255,255,255,0.08);color:var(--text-primary)}
+.modal-body{padding:18px 22px 22px}
+.modal-env-desc{font-size:0.86rem;color:var(--text-secondary);line-height:1.8;margin-bottom:18px;padding:16px;background:rgba(255,255,255,0.03);border-radius:var(--radius-md);border-left:2px solid var(--accent-lavender)}
+.modal-section-title{font-family:var(--font-serif);font-size:0.82rem;font-weight:700;color:var(--text-secondary);margin-bottom:10px}
+.modal-chars-list{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.modal-char-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm)}
+.modal-char-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.85rem;font-weight:700}
+.modal-char-avatar.male{background:rgba(100,216,216,0.2);color:var(--accent-cyan)}.modal-char-avatar.female{background:rgba(255,107,157,0.2);color:var(--accent-pink)}
+.modal-char-name{font-weight:600;font-size:0.85rem}.modal-char-status{font-size:0.74rem;color:var(--text-muted);margin-top:1px}
+
+.form-group{margin-bottom:12px}.form-label{font-size:0.76rem;color:var(--text-secondary);margin-bottom:4px;display:block;letter-spacing:0.03em}
+.form-input,.form-textarea{width:100%;font-family:var(--font-sans);font-size:0.85rem;color:var(--text-primary);background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);border-radius:var(--radius-sm);padding:9px 12px;transition:all var(--transition-fast);outline:none}
+.form-input:focus,.form-textarea:focus{border-color:var(--accent-lavender);box-shadow:0 0 0 3px rgba(179,136,255,0.1)}.form-textarea{resize:vertical;min-height:60px;line-height:1.6}
+.form-select{width:100%;font-family:var(--font-sans);font-size:0.85rem;color:var(--text-primary);background:rgba(255,255,255,0.05);border:1px solid var(--border-glass);border-radius:var(--radius-sm);padding:9px 12px;cursor:pointer;outline:none}
+
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap}
+.modal-action-btn{display:flex;align-items:center;gap:5px;font-family:var(--font-sans);font-size:0.8rem;font-weight:500;padding:8px 15px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition-fast);border:1px solid var(--border-glass);background:var(--bg-glass);color:var(--text-primary)}
+.modal-action-btn:hover{background:var(--bg-glass-hover);border-color:var(--border-glow);transform:translateY(-1px)}
+.modal-action-btn.primary{background:linear-gradient(135deg,rgba(255,107,157,0.3),rgba(179,136,255,0.15));border-color:rgba(255,107,157,0.3)}
+.modal-action-btn.danger{color:#ff7070;border-color:rgba(255,100,100,0.3)}.modal-action-btn.danger:hover{background:rgba(255,80,80,0.15)}
+.modal-action-btn.small{padding:5px 10px;font-size:0.73rem}
+.tab-bar{display:flex;gap:2px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:3px;margin-bottom:14px}
+.tab-btn{flex:1;font-family:var(--font-sans);font-size:0.78rem;font-weight:500;padding:7px 10px;border:none;border-radius:var(--radius-sm);background:transparent;color:var(--text-secondary);cursor:pointer;transition:all var(--transition-fast);text-align:center}
+.tab-btn:hover{color:var(--text-primary)}.tab-btn.active{background:rgba(255,107,157,0.2);color:var(--accent-pink-soft)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.checklist{display:flex;flex-direction:column;gap:3px;max-height:150px;overflow-y:auto}
+.checklist-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:var(--radius-sm);font-size:0.8rem;cursor:pointer;transition:all var(--transition-fast)}
+.checklist-item:hover{background:rgba(255,255,255,0.04)}.checklist-item input[type=checkbox]{accent-color:var(--accent-pink);cursor:pointer}
+.item-list{display:flex;flex-direction:column;gap:5px}
+.item-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);transition:all var(--transition-fast)}
+.item-row:hover{background:rgba(255,255,255,0.06)}.item-name{font-size:0.83rem;font-weight:500;flex:1;cursor:pointer}
+.item-meta{font-size:0.72rem;color:var(--text-muted);margin:0 8px}.item-actions{display:flex;gap:3px}
+.status-badge{display:inline-block;font-size:0.68rem;font-weight:600;padding:2px 8px;border-radius:10px}
+.status-badge.ok{background:rgba(100,216,150,0.15);color:#64d896}.status-badge.warn{background:rgba(240,192,96,0.15);color:var(--accent-gold)}.status-badge.err{background:rgba(255,100,100,0.15);color:#ff6464}
+.empty-state{text-align:center;padding:36px 20px;color:var(--text-muted)}.empty-state svg{width:36px;height:36px;margin-bottom:10px;opacity:0.3}.empty-state p{font-size:0.83rem}
+.loading-dots{display:flex;gap:5px;align-items:center;padding:6px 0}.loading-dots span{width:7px;height:7px;border-radius:50%;background:var(--accent-pink);animation:dotBounce 1.4s infinite ease-in-out both}.loading-dots span:nth-child(2){animation-delay:0.16s}.loading-dots span:nth-child(3){animation-delay:0.32s}
 @keyframes dotBounce{0%,80%,100%{transform:scale(0.4);opacity:0.4}40%{transform:scale(1);opacity:1}}
 
-/* Responsive */
-@media(max-width:768px){
-  .game-layout{grid-template-columns:1fr;height:auto;}
-  .game-sidebar{display:none;}
-  .protagonists-grid{grid-template-columns:1fr;}
-  .hero-title{font-size:2rem;}
-  .nav-link span{display:none;}
-  .nav-link{padding:9px 10px;}
-  .map-grid.size-3,.map-grid.size-4,.map-grid.size-5{grid-template-columns:repeat(2,1fr);}
-  .chars-grid{grid-template-columns:1fr;}
-}
+.toast-container{position:fixed;top:18px;right:18px;z-index:1000;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:8px;background:rgba(20,16,40,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border-glass);border-radius:var(--radius-md);padding:11px 16px;pointer-events:auto;transform:translateX(120%);opacity:0;transition:all var(--transition-spring);box-shadow:0 8px 32px rgba(0,0,0,0.4);min-width:240px}
+.toast.visible{transform:translateX(0);opacity:1}
+.toast-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toast-icon.success{background:rgba(100,216,150,0.2);color:#64d896}.toast-icon.info{background:rgba(100,216,216,0.2);color:var(--accent-cyan)}.toast-icon.warning{background:rgba(240,192,96,0.2);color:var(--accent-gold)}
+.toast-message{font-size:0.81rem;flex:1}.toast-close{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:3px}
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity var(--transition-smooth)}
+.confirm-overlay.open{opacity:1;pointer-events:auto}
+.confirm-panel{background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);padding:22px;max-width:360px;width:90%;transform:translateY(20px);transition:transform var(--transition-spring)}
+.confirm-overlay.open .confirm-panel{transform:translateY(0)}.confirm-message{font-size:0.9rem;margin-bottom:16px;line-height:1.6}
+.confirm-buttons{display:flex;gap:6px;justify-content:flex-end}
+.confirm-btn{font-family:var(--font-sans);font-size:0.8rem;font-weight:500;padding:8px 16px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition-fast);border:1px solid var(--border-glass)}
+.confirm-btn.cancel{background:transparent;color:var(--text-secondary)}.confirm-btn.confirm-action{background:linear-gradient(135deg,rgba(255,107,157,0.4),rgba(179,136,255,0.2));border-color:rgba(255,107,157,0.3);color:var(--text-primary)}
+@media(max-width:768px){.home-layout{grid-template-columns:1fr}.game-layout{grid-template-columns:1fr;height:auto}.game-sidebar{display:none}.hero-title{font-size:1.8rem}.nav-link span{display:none}.nav-link{padding:8px 9px}}
 </style>
 </head>
 <body>
@@ -717,128 +228,82 @@ body::before {
 
 <div id="app-shell">
   <nav class="top-nav">
-    <div class="nav-brand" onclick="navigateTo('home')" id="nav-brand">心之回响</div>
+    <div class="nav-brand" onclick="navigateTo('home')">心之回响</div>
     <div class="nav-links" id="nav-links">
-      <button class="nav-link active" data-page="home" id="nav-home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>主页</span>
-      </button>
-      <button class="nav-link" data-page="map" id="nav-map">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-        <span>地图</span>
-      </button>
-      <button class="nav-link" data-page="story" id="nav-story">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        <span>剧情</span>
-      </button>
-      <button class="nav-link" data-page="characters" id="nav-characters">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>角色</span>
-      </button>
-      <button class="nav-link highlight" data-page="game" id="nav-game">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        <span>游戏</span>
-      </button>
+      <button class="nav-link active" data-page="home" id="nav-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>主页</span></button>
+      <button class="nav-link" data-page="map" id="nav-map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg><span>地图</span></button>
+      <button class="nav-link" data-page="diary" id="nav-diary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>日记</span></button>
+      <button class="nav-link" data-page="characters" id="nav-characters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>角色</span></button>
+      <button class="nav-link highlight" data-page="game" id="nav-game"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>游戏</span></button>
     </div>
     <div class="nav-actions">
-      <button class="nav-icon-btn" onclick="openSettingsModal()" id="btn-settings" title="设置">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      </button>
-      <div class="nav-time" id="nav-time">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span id="time-display">第 1 天 · 午前</span>
-      </div>
+      <button class="nav-icon-btn" onclick="openSettingsModal()" id="btn-settings" title="设置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
   </nav>
 
   <main id="page-container">
 
-    <!-- ===== HOME PAGE ===== -->
+    <!-- HOME -->
     <section class="page active" id="page-home">
-      <div class="hero-section">
-        <h1 class="hero-title">心之回响</h1>
-        <p class="hero-subtitle">Heart's Echo</p>
-        <p class="hero-tagline">在这座城市里，寻找属于你的回响。</p>
-      </div>
-      <div class="protagonists-grid" id="protagonists-grid"></div>
-      <div class="quick-actions">
-        <button class="quick-action-btn" onclick="navigateTo('game')" id="btn-goto-game">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          开始游戏
-        </button>
-        <button class="quick-action-btn" onclick="navigateTo('map')" id="btn-goto-map">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-          探索地图
-        </button>
-        <button class="quick-action-btn" onclick="navigateTo('story')" id="btn-goto-story">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          剧情日志
-        </button>
-        <button class="quick-action-btn primary" onclick="openLorebookModal()" id="btn-lorebooks">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
-          世界书
-        </button>
+      <h1 class="hero-title">心之回响</h1>
+      <p class="hero-subtitle">Heart's Echo</p>
+      <div class="home-layout">
+        <div class="home-left">
+          <div class="home-status-card" id="home-status-card"></div>
+          <div class="home-status-card" id="home-where-card"></div>
+        </div>
+        <div class="home-right">
+          <div class="home-action-card primary" onclick="startDayFlow()" id="home-action-start">
+            <h3 id="home-action-title">开始新的一天</h3>
+            <p id="home-action-desc">前往地图选择今日要去的地点</p>
+          </div>
+          <div class="home-action-card" onclick="navigateTo('diary')" id="home-action-diary">
+            <h3>日记</h3>
+            <p>回顾每一天的故事摘要</p>
+          </div>
+          <div class="home-action-card" onclick="openLorebookModal()" id="home-action-lorebook">
+            <h3>世界书</h3>
+            <p>管理世界观设定与角色背景</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- ===== MAP PAGE ===== -->
+    <!-- MAP -->
     <section class="page" id="page-map">
       <div class="map-header">
-        <h2 class="map-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-          城市场景地图
-        </h2>
-        <div class="map-controls">
-          <button class="map-control-btn" onclick="resetMap()" id="btn-map-reset">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> 重置</button>
-          <button class="map-control-btn expand" onclick="expandMap()" id="btn-map-expand">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 扩展区域</button>
+        <div>
+          <h2 class="map-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>选择今日地点</h2>
+          <p class="map-hint" id="map-hint">点击任意地点选为今日去向，之后将在此展开故事</p>
         </div>
       </div>
       <div class="map-grid size-2" id="map-grid"></div>
     </section>
 
-    <!-- ===== STORY PAGE ===== -->
-    <section class="page" id="page-story">
-      <div class="story-header">
-        <h2 class="story-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          剧情日志
-        </h2>
-        <p class="story-chapter">第一章 · 相遇的季节</p>
-      </div>
-      <div class="timeline" id="timeline"></div>
+    <!-- DIARY -->
+    <section class="page" id="page-diary">
+      <div class="diary-header"><h2 class="diary-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>日记</h2></div>
+      <div class="diary-entries" id="diary-entries"></div>
     </section>
 
-    <!-- ===== CHARACTERS PAGE ===== -->
+    <!-- CHARACTERS -->
     <section class="page" id="page-characters">
-      <div class="story-header">
-        <h2 class="story-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          角色关系
-        </h2>
-      </div>
+      <div class="diary-header"><h2 class="diary-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>角色关系</h2></div>
       <div class="chars-grid" id="chars-grid"></div>
     </section>
 
-    <!-- ===== GAME PAGE (LLM) ===== -->
+    <!-- GAME -->
     <section class="page" id="page-game">
       <div class="game-layout">
         <div class="game-main">
           <div class="game-scene-header">
-            <div class="game-scene-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span id="game-scene-label">教室</span>
-            </div>
-            <div class="game-scene-info" id="game-scene-info"></div>
+            <div class="game-scene-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="game-scene-label">未开始</span></div>
+            <div class="game-day-info"><span id="game-day-label">第1天·4月</span><span class="game-msg-counter" id="game-msg-counter">0/50</span></div>
           </div>
           <div class="game-text-area" id="game-text-area">
-            <div class="empty-state">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              <p>输入你的行动，或者点击预设选项开始故事...</p>
-            </div>
+            <div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p id="game-empty-msg">请先在主页选择今日地点并开始新的一天</p></div>
           </div>
-          <div id="game-loading" style="display:none;padding:16px 24px;"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+          <div id="game-loading" style="display:none;padding:12px 20px;"><div class="loading-dots"><span></span><span></span><span></span></div></div>
           <div class="game-options-area" id="game-options-area"></div>
           <div class="game-input-area">
             <input class="game-input" id="game-input" placeholder="输入你的行动、对话或想法..." onkeydown="handleGameInputKey(event)">
@@ -847,31 +312,12 @@ body::before {
         </div>
         <div class="game-sidebar">
           <div class="sidebar-panel">
-            <div class="sidebar-panel-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              会话
-            </div>
-            <div class="chat-session-list" id="chat-session-list"></div>
-            <button class="modal-action-btn small" style="width:100%;margin-top:8px;justify-content:center;" onclick="handleCreateChat()" id="btn-new-chat">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              新会话
-            </button>
+            <div class="sidebar-panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>变量</div>
+            <div class="var-list" id="var-list"><div style="font-size:0.76rem;color:var(--text-muted);">暂无变量</div></div>
           </div>
-          <div class="sidebar-panel" id="sidebar-vars">
-            <div class="sidebar-panel-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-              变量
-            </div>
-            <div class="var-list" id="var-list">
-              <div style="font-size:0.78rem;color:var(--text-muted);">暂无变量</div>
-            </div>
-          </div>
-          <div class="sidebar-panel" id="sidebar-sum">
-            <div class="sidebar-panel-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-              摘要
-            </div>
-            <div class="sum-text" id="sum-text" style="font-size:0.78rem;color:var(--text-muted);">等待剧情发展...</div>
+          <div class="sidebar-panel">
+            <div class="sidebar-panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>摘要</div>
+            <div class="sum-text" id="sum-text" style="font-size:0.76rem;color:var(--text-muted);">等待今日剧情...</div>
           </div>
         </div>
       </div>
@@ -880,1154 +326,895 @@ body::before {
   </main>
 </div>
 
-<!-- ===== SETTINGS MODAL ===== -->
-<div class="modal-overlay" id="modal-settings">
-  <div class="modal-panel" id="modal-settings-panel"></div>
-</div>
-
-<!-- ===== LOREBOOK MODAL ===== -->
-<div class="modal-overlay" id="modal-lorebook">
-  <div class="modal-panel wide" id="modal-lorebook-panel"></div>
-</div>
-
-<!-- ===== PRESET MODAL ===== -->
-<div class="modal-overlay" id="modal-preset">
-  <div class="modal-panel" id="modal-preset-panel"></div>
-</div>
-
-<!-- ===== LOCATION DETAIL MODAL ===== -->
-<div class="modal-overlay" id="modal-location">
-  <div class="modal-panel" id="modal-location-panel"></div>
-</div>
-
-<!-- ===== ADD LOCATION MODAL ===== -->
-<div class="modal-overlay" id="modal-add-location">
-  <div class="modal-panel" id="modal-add-location-panel"></div>
-</div>
-
-<!-- ===== CHAR DETAIL MODAL ===== -->
-<div class="modal-overlay" id="modal-char-detail">
-  <div class="modal-panel" id="modal-char-detail-panel"></div>
-</div>
-
-<!-- ===== CONFIRM DIALOG ===== -->
-<div class="confirm-overlay" id="confirm-dialog">
-  <div class="confirm-panel">
-    <div class="confirm-message" id="confirm-message"></div>
-    <div class="confirm-buttons">
-      <button class="confirm-btn cancel" onclick="hideConfirm()">取消</button>
-      <button class="confirm-btn confirm-action" id="confirm-action">确认</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="modal-settings"><div class="modal-panel" id="modal-settings-panel"></div></div>
+<div class="modal-overlay" id="modal-lorebook"><div class="modal-panel wide" id="modal-lorebook-panel"></div></div>
+<div class="modal-overlay" id="modal-preset"><div class="modal-panel" id="modal-preset-panel"></div></div>
+<div class="modal-overlay" id="modal-location"><div class="modal-panel" id="modal-location-panel"></div></div>
+<div class="confirm-overlay" id="confirm-dialog"><div class="confirm-panel"><div class="confirm-message" id="confirm-message"></div><div class="confirm-buttons"><button class="confirm-btn cancel" onclick="hideConfirm()">取消</button><button class="confirm-btn confirm-action" id="confirm-action">确认</button></div></div></div>
 <div class="toast-container" id="toast-container"></div>
 
-<!-- ===== MAIN SCRIPT (ES Module) ===== -->
 <script type="module">
 import {
-  sillytavernStore,
-  initializeDatabase, saveSettings,
-  saveLorebook, deleteLorebook,
-  savePreset, deletePreset,
-  getChats, saveChat, deleteChat as deleteChatDb,
-  getLorebooks, getPresets,
+  sillytavernStore, initializeDatabase, saveSettings, saveLorebook, deleteLorebook,
+  savePreset, deletePreset, getChats, saveChat, getLorebooks,
   importLorebook, createDefaultLorebook, createDefaultEntry,
-  createDefaultPreset, DEFAULT_SETTINGS, DEFAULT_FORMAT_PROMPT,
+  createDefaultPreset, DEFAULT_SETTINGS,
   StreamTagParser, aggregateEvents, applyParsedToChat,
-  fetchModels, testConnection, getFallbackModels,
-  assemblePrompt, replaceMacros, SUPPORTED_MACROS,
-  extractVariables, mergeVariables, formatVariablesForPrompt
+  fetchModels, testConnection, assemblePrompt,
 } from './dist/game-bundle.js';
 
-// ==================== DEFAULT GAME CONTEXT ====================
-const GAME_SYSTEM_PROMPT = `你是文字冒险游戏《心之回响》的剧情引擎。
-
-## 核心设定
-- 故事类型：现代都市校园恋爱剧情
-- 男主角：林澈 (Lin Che) — 转校生，内敛沉静、善于观察、内心温柔，二年A班
-- 女主角：苏晚晴 (Su Wanqing) — 班长，温柔坚韧、善解人意、偶尔固执，二年A班
-- 世界观：现代都市校园，樱花季。地点包括教室、天台、公园、奶茶店
-- 主题：青春、相遇、选择、成长
-- 风格：日式 Galgame 叙事，细腻的心理描写，温暖的日常与微妙的感情变化
-
-## 你的角色
-你现在扮演"剧情旁白 + 女主角苏晚晴"，以混合叙事方式推进故事。你描述场景、氛围和苏晚晴的言行心理。
-
-## 输出格式（严格遵守，禁止使用 Markdown 代码块包裹）
-你必须每回合按以下 XML 标签输出：
-
-<thinking>
-这里用中文写你的推理过程：当前场景状态、角色心理、剧情发展方向
-</thinking>
-
-<maintext>
-正文叙事内容。可以多段落，保持换行。用文学化的语言描述场景、人物动作对话和心理。
-</maintext>
-
-<option>
-选项文字A
-选项文字B
-选项文字C
-</option>
-
-<sum>
-一句话概括本回合发生的事
-</sum>
-
-<vars>
-{ "好感度": 5 }
-</vars>
-
-注意：
-- <maintext> 和 <option> 必须存在
-- <option> 至少 2 个选项，每行一个，不要编号
-- 选项要推动剧情发展，引导玩家做出有意义的抉择
-- <vars> 中的好感度每次更新为正负整数（如 +5 或 -3），JSON 格式`;
-
-// ==================== GALGAME DATA ====================
-const Locations = [
-  { id:'rooftop',name:'天台',type:'rooftop',description:'午后的风轻轻拂过，天空澄澈如洗。这里是整座学校视野最好的地方，也是独自思考与偶然邂逅的场所。远处城市的轮廓在薄雾中若隐若现。',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>',characters:['female'],timeSensitive:'午后阳光最佳' },
-  { id:'classroom',name:'教室',type:'classroom',description:'窗外的樱花正盛开着。熟悉的课桌整齐排列，黑板上还残留着上节课的板书。阳光透过玻璃洒在桌面上，尘埃在光柱中缓缓飘舞。',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',characters:['male'],timeSensitive:'上午课程时段' },
-  { id:'park',name:'公园',type:'park',description:'樱花树下的长椅总是安静地等待着什么。喷泉的水声清脆悦耳，偶尔有几片花瓣飘落到水面，荡起细小的涟漪。黄昏时分，这里的夕阳美得令人屏息。',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14l4-4-4-4"/><path d="M3 18v-2a4 4 0 0 1 4-4h4"/></svg>',characters:['male','female'],timeSensitive:'黄昏景色最美' },
-  { id:'teashop',name:'奶茶店',type:'teashop',description:'推开玻璃门的瞬间，甜蜜的香气便扑面而来。暖黄色的灯光下，角落里的座位格外舒适。菜单上写满了各种新奇的口味，是放学后人气的聚集地。',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>',characters:[],timeSensitive:'放学后热门' }
+// ==================== GAME CONSTANTS ====================
+const MONTHS = ['4月','5月','6月','7月','9月','11月','1月','3月'];
+const MAX_MESSAGES_PER_DAY = 50;
+const KEY_EVENTS = [
+  {day:1,name:'开学·樱花季',desc:'新学期开始，樱花盛开的四月'},
+  {day:2,name:'期中考试',desc:'期中考试周，图书馆里弥漫着紧张的氛围'},
+  {day:3,name:'校园文化祭',desc:'各班筹备已久的文化祭终于到来'},
+  {day:4,name:'暑假前夕',desc:'暑假前的最后一天，空气中满是期待'},
+  {day:5,name:'体育祭',desc:'秋日的操场上，呐喊声此起彼伏'},
+  {day:6,name:'学园祭',desc:'学园祭的分组准备,创意与笑话齐飞'},
+  {day:7,name:'期末考试',desc:'一学期的终点，也是最后一次冲刺'},
+  {day:8,name:'毕业·结局',desc:'樱花再开时，故事走到了分岔路口'},
+];
+const AFFECTION_LADDER = [
+  {min:0,max:29,label:'陌生人',desc:'客套的对话，尚未熟悉彼此'},
+  {min:30,max:49,label:'相识',desc:'开始记住彼此的名字和习惯'},
+  {min:50,max:69,label:'朋友',desc:'可以开玩笑，偶尔一起放学'},
+  {min:70,max:84,label:'好友',desc:'主动找你聊天，分享心事'},
+  {min:85,max:94,label:'暧昧',desc:'微妙的眼神和触碰，关键分支点'},
+  {min:95,max:100,label:'恋人',desc:'告白与回应，专属的结局线'},
 ];
 
-const StoryEntries = [
-  { time:'第 1 天 · 午前',title:'转校的第一天',preview:'林澈站在陌生的校门前，深吸了一口气。樱花的花瓣随着微风飘落在他的肩上。新的城市，新的学校，新的开始——他是这样告诉自己的。',location:'校门口' },
-  { time:'第 1 天 · 午前',title:'教室里的初遇',preview:'当班主任介绍新同学时，坐在窗边的苏晚晴抬起了头。阳光恰好落在那个少年的侧脸上。她微微怔了一下，然后露出了一个礼貌而温暖的笑容。',location:'教室' },
-  { time:'第 1 天 · 午后',title:'天台的邂逅',preview:'林澈无意中发现了通向天台的楼梯。推开门的一瞬间，他看见了一个熟悉的背影——是那个坐在窗边的女孩。风拂过她的发梢，她回过头来，微微惊讶。',location:'天台' },
-  { time:'第 1 天 · 放学后',title:'公园偶遇',preview:'落日的余晖将整座公园染成了金色。林澈在樱花树下的长椅上坐下，不久后，一个身影停在了他面前。"你也喜欢这里吗？"苏晚晴的声音里带着一丝惊喜。',location:'公园' },
-  { time:'第 2 天 · 放学后',title:'奶茶店的邀约',preview:'苏晚晴在放学时递过来一张纸条："新开的奶茶店，听说很不错。一起去试试？"这是她第一次主动邀约。林澈看着纸条上清秀的字迹，嘴角不自觉地上扬。',location:'奶茶店' },
-  { time:'第 3 天 · 午前',title:'图书馆的偶遇',preview:'为准备期中考试，林澈来到图书馆自习。刚坐下不久，对面的椅子被轻轻拉开——苏晚晴抱着几本书，对他微微一笑。"好巧。不介意我坐这里吧？"',location:'图书馆' }
+const Locations = [
+  {id:'rooftop',name:'天台',type:'rooftop',description:'午后的风轻轻拂过，天空澄澈如洗。这里是整座学校视野最好的地方，可以俯瞰远处的城市轮廓。也是独自思考与偶然邂逅的场所。',characters:['male'],timeSensitive:'午后阳光最佳'},
+  {id:'classroom',name:'教室',type:'classroom',description:'窗外的樱花正盛开着。熟悉的课桌整齐排列，黑板上还残留着上节课的板书。阳光透过玻璃洒在桌面上。',characters:['male'],timeSensitive:'上午课程时段'},
+  {id:'park',name:'公园',type:'park',description:'樱花树下的长椅安静地等待着。喷泉的水声清脆悦耳，偶尔有花瓣飘落到水面，荡起细小的涟漪。黄昏时分的夕阳美得令人屏息。',characters:['male','female'],timeSensitive:'黄昏景色最美'},
+  {id:'teashop',name:'奶茶店',type:'teashop',description:'推开玻璃门的瞬间，甜蜜的香气扑面而来。暖黄色灯光下，角落的座位格外舒适。菜单上写满各种新奇口味，是放学后人气的聚集地。',characters:[],timeSensitive:'放学后热门'},
 ];
 
 const gameCharacters = [
-  { id:'male',name:'林澈',gender:'male',role:'男主角 · 转校生',traits:'内敛沉静、善于观察、内心温柔',birthday:'11月15日',height:'178cm',likes:'阅读、摄影、安静的午后',affiliation:'二年A班',status:'教室内',affection:0,affectionMax:100 },
-  { id:'female',name:'苏晚晴',gender:'female',role:'女主角 · 班长',traits:'温柔坚韧、善解人意、偶尔固执',birthday:'3月21日',height:'163cm',likes:'樱花、奶茶、夕阳下的散步',affiliation:'二年A班 · 班长',status:'天台休憩中',affection:45,affectionMax:100 }
+  {id:'male',name:'林澈',gender:'male',role:'男主角·转校生',traits:'内敛沉静、善于观察、内心温柔',birthday:'11月15日',height:'178cm',likes:'阅读、摄影、安静的午后',affiliation:'二年A班',status:'教室内',affection:0,affectionMax:100},
+  {id:'female',name:'苏晚晴',gender:'female',role:'女主角·班长',traits:'温柔坚韧、善解人意、偶尔固执',birthday:'3月21日',height:'163cm',likes:'樱花、奶茶、夕阳下的散步',affiliation:'二年A班·班长',status:'天台休憩中',affection:45,affectionMax:100},
 ];
+
+const GAME_SYSTEM_PROMPT = `你是文字冒险游戏《心之回响》的剧情引擎。
+
+## 核心设定
+- 类型：现代都市校园恋爱剧情
+- 男主角：林澈 — 转校生，内敛沉静，善于观察，二年A班
+- 女主角：苏晚晴 — 班长，温柔坚韧，善解人意，二年A班
+- 世界观：春日的樱华学园，樱花正盛开。地点包括教室、天台、公园、奶茶店。
+- 风格：日式 Galgame 叙事，细腻心理描写，温暖日常与微妙感情变化。
+
+## 你的角色
+以混合叙事方式推进：你描述场景氛围 + 苏晚晴的言行心理。
+
+## 输出格式（严格遵守，禁止用 Markdown 代码块包裹）
+<maintext>
+正文叙事。可多段，保留换行。用文学化语言描述场景、人物动作对话和心理。
+</maintext>
+<option>
+选项A
+选项B
+选项C
+</option>
+<sum>
+一句话概括本回合发生的事
+</sum>
+<vars>
+{"好感度": 5}
+</vars>
+规则：<maintext>必有叙事；<option>至少2个选项，每行一个不要编号，推动剧情发展的有意义抉择；<vars> 中好感度为正负整数如 +5 或 -3。`;
+
+const GAME_DAY_START_PROMPT = `今天是${MONTHS[0]}，新学期刚开始。校园里樱花盛开。《心之回响》的故事正在展开。
+
+当前场景：${Locations[1].name}。${Locations[1].description}
+
+请以剧情旁白+女主角苏晚晴的混合视角，描述今天在${Locations[1].name}的场景。林澈（玩家）刚刚到来。生成一段优美的开场叙事，然后给出2-3个选项让玩家选择接下来的行动。
+
+务必按照格式输出标签：<maintext>、<option>、<sum>、<vars>。`;
 
 // ==================== APP STATE ====================
 let currentPage = 'home';
-let mapSize = 2;
-let customLocations = [];
-let nextLocationId = 0;
+let currentDay = 1;
+let todayLocation = null; // {id,name,type,...} or null
+let dayStarted = false;
+let messagesToday = 0;
+let diaryEntries = []; // [{day, month, location, summary, affectionChange, isEvent}]
 let currentOptions = [];
 let storeReady = false;
+let previousAffection = 45; // for detecting milestone crossings
 
-// Stream parser
-function makeParser() {
-  const st = sillytavernStore;
-  const tags = st.settings?.customTags || ['maintext','option','sum','vars','thinking','think'];
-  const opaqueTags = ['thinking','think'];
-  return new StreamTagParser(tags, opaqueTags);
+function getMonth(){return MONTHS[currentDay-1]||'?'}
+function getKeyEvent(day){return KEY_EVENTS.find(e=>e.day===day)}
+function getAffectionLabel(val){
+  if(val===undefined||val===null) val=gameCharacters[1].affection;
+  for(const l of AFFECTION_LADDER){if(val>=l.min&&val<=l.max)return l}
+  return AFFECTION_LADDER[0];
+}
+function checkMilestone(oldVal,newVal){
+  const oldL=AFFECTION_LADDER.findIndex(l=>oldVal>=l.min&&oldVal<=l.max);
+  const newL=AFFECTION_LADDER.findIndex(l=>newVal>=l.min&&newVal<=l.max);
+  return newL>oldL?AFFECTION_LADDER[newL]:null;
+}
+
+function makeParser(){
+  const tags=sillytavernStore.settings?.customTags||['maintext','option','sum','vars','thinking','think'];
+  return new StreamTagParser(tags,['thinking','think']);
 }
 
 // ==================== PARTICLES ====================
-function initParticles() {
-  const canvas = document.getElementById('particles-canvas');
-  const ctx = canvas.getContext('2d');
-  let particles = [];
-  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  resize(); window.addEventListener('resize', resize);
-  class Particle {
-    constructor() { this.reset(); this.y = Math.random() * canvas.height; }
-    reset() { this.x = Math.random() * canvas.width; this.y = -10; this.size = Math.random() * 2.5 + 1; this.speedY = Math.random() * 0.4 + 0.15; this.speedX = (Math.random() - 0.5) * 0.3; this.opacity = Math.random() * 0.35 + 0.08; this.wobble = Math.random() * Math.PI * 2; this.wobbleSpeed = Math.random() * 0.015 + 0.005; }
-    update() { this.wobble += this.wobbleSpeed; this.x += this.speedX + Math.sin(this.wobble) * 0.2; this.y += this.speedY; if(this.y > canvas.height + 10) this.reset(); if(this.x < -10) this.x = canvas.width + 10; if(this.x > canvas.width + 10) this.x = -10; }
-    draw(ctx) { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(255,182,193,${this.opacity})`; ctx.fill(); }
-  }
-  for(let i=0;i<50;i++) particles.push(new Particle());
-  function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{p.update();p.draw(ctx);}); requestAnimationFrame(animate); }
-  animate();
+function initParticles(){
+  const canvas=document.getElementById('particles-canvas'),ctx=canvas.getContext('2d');
+  let particles=[];
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  class P{constructor(){this.reset();this.y=Math.random()*canvas.height}
+    reset(){this.x=Math.random()*canvas.width;this.y=-10;this.size=Math.random()*2.5+1;this.speedY=Math.random()*0.4+0.15;this.speedX=(Math.random()-0.5)*0.3;this.opacity=Math.random()*0.35+0.08;this.wobble=Math.random()*Math.PI*2;this.wobbleSpeed=Math.random()*0.015+0.005}
+    update(){this.wobble+=this.wobbleSpeed;this.x+=this.speedX+Math.sin(this.wobble)*0.2;this.y+=this.speedY;if(this.y>canvas.height+10)this.reset();if(this.x<-10)this.x=canvas.width+10;if(this.x>canvas.width+10)this.x=-10}
+    draw(c){c.beginPath();c.arc(this.x,this.y,this.size,0,Math.PI*2);c.fillStyle=`rgba(255,182,193,${this.opacity})`;c.fill()}}
+  for(let i=0;i<50;i++)particles.push(new P());
+  (function a(){ctx.clearRect(0,0,canvas.width,canvas.height);particles.forEach(p=>{p.update();p.draw(ctx)});requestAnimationFrame(a)})();
 }
 
 // ==================== NAVIGATION ====================
-function navigateTo(page) {
-  currentPage = page;
+function navigateTo(page){
+  currentPage=page;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-  const tp = document.getElementById(`page-${page}`);
-  if(tp) tp.classList.add('active');
-  const nl = document.getElementById(`nav-${page}`);
-  if(nl) nl.classList.add('active');
-  if(page==='map') renderMap();
-  if(page==='story') renderStory();
-  if(page==='characters') renderCharacters();
-  if(page==='game') refreshGameUI();
+  const tp=document.getElementById('page-'+page);if(tp)tp.classList.add('active');
+  const nl=document.getElementById('nav-'+page);if(nl)nl.classList.add('active');
+  if(page==='map')renderMap();
+  if(page==='diary')renderDiary();
+  if(page==='characters')renderCharacters();
+  if(page==='game')refreshGameUI();
+  if(page==='home')renderHome();
 }
-window.navigateTo = navigateTo;
+window.navigateTo=navigateTo;
+
+// ==================== HOME ====================
+function renderHome(){
+  const female=gameCharacters[1];
+  const aff=typeof female.affection==='number'?female.affection:45;
+  const lbl=getAffectionLabel(aff);
+  const pct=Math.min(100,Math.max(0,aff));
+  const evt=getKeyEvent(currentDay);
+  const month=getMonth();
+
+  const statusCard=document.getElementById('home-status-card');
+  statusCard.innerHTML=`
+    <div class="status-grid">
+      <div class="status-item"><div class="status-label">当前日期</div><div class="status-value">第 ${currentDay} 天</div></div>
+      <div class="status-item"><div class="status-label">月份</div><div class="status-value highlight">${month}</div></div>
+      <div class="status-item"><div class="status-label">好感度</div><div class="status-value">${aff} / 100</div></div>
+      <div class="status-item"><div class="status-label">关系状态</div><div class="status-value">${lbl.label}</div></div>
+    </div>
+    <div class="affection-gauge">
+      <div class="affection-bar-wrap"><div class="affection-bar-fill" style="width:${pct}%"></div></div>
+      <div class="affection-meta"><span>${lbl.desc}</span></div>
+      <div class="affection-ladder">${AFFECTION_LADDER.map(l=>`<div class="ladder-step${l.label===lbl.label?' active':''}">${l.label}</div>`).join('')}</div>
+    </div>
+    ${evt?`<div class="day-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>关键事件：${evt.name}</div>`:''}`;
+
+  const whereCard=document.getElementById('home-where-card');
+  if(todayLocation){
+    whereCard.innerHTML=`<div style="font-size:0.82rem;color:var(--text-secondary);">今日地点</div><div style="font-size:1.2rem;font-weight:700;margin-top:4px;">${todayLocation.name}</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:6px;">${todayLocation.description.slice(0,80)}...</div>`;
+  } else {
+    whereCard.innerHTML=`<div style="font-size:0.82rem;color:var(--text-secondary);">今日地点</div><div style="font-size:1rem;font-weight:600;margin-top:4px;color:var(--text-muted);">尚未选择</div>`;
+  }
+
+  const actionTitle=document.getElementById('home-action-title');
+  const actionDesc=document.getElementById('home-action-desc');
+  if(todayLocation&&!dayStarted){
+    actionTitle.textContent='开始今天';
+    actionDesc.textContent=`在「${todayLocation.name}」展开今日的故事`;
+  } else if(dayStarted){
+    actionTitle.textContent='继续游戏';
+    actionDesc.textContent='返回游戏界面继续今日对话';
+  } else {
+    actionTitle.textContent='选择今日地点';
+    actionDesc.textContent='前往地图选择今天要去的地方';
+  }
+
+  document.getElementById('game-day-label').textContent=`第${currentDay}天·${month}`;
+  document.getElementById('game-msg-counter').textContent=`${messagesToday}/${MAX_MESSAGES_PER_DAY}`;
+  const counter=document.getElementById('game-msg-counter');
+  if(messagesToday>=MAX_MESSAGES_PER_DAY*0.8)counter.classList.add('warning');
+  else counter.classList.remove('warning');
+}
+window.renderHome=renderHome;
+
+function startDayFlow(){
+  if(dayStarted){navigateTo('game');return;}
+  if(todayLocation){beginDayDialogue();return;}
+  navigateTo('map');
+  showToast('请选择一个地点作为今日去向','info');
+}
+window.startDayFlow=startDayFlow;
 
 // ==================== MAP ====================
-function getActiveLocations() { return [...Locations, ...customLocations]; }
-
-function renderMap() {
-  const grid = document.getElementById('map-grid');
-  grid.className = `map-grid size-${mapSize}`;
-  const all = getActiveLocations(); const total = mapSize * mapSize; let html = '';
-  for(let i=0;i<total;i++){
-    const loc = all[i];
-    if(loc){
-      const charHtml = (loc.characters||[]).map(cid=>{ const ch=gameCharacters.find(c=>c.id===cid); return ch?`<span class="char-dot ${ch.gender}" title="${ch.name}">${ch.name[0]}</span>`:''; }).join('');
-      html+=`<div class="map-cell occupied" id="map-cell-${loc.id}" onclick="openLocationDetail('${loc.id}')" onmousemove="handleCellHover(event,this)"><div><div class="location-name">${loc.name}</div><div class="location-desc">${loc.description.slice(0,40)}...</div></div><div class="location-chars">${charHtml||'<span style="font-size:0.72rem;color:var(--text-muted)">暂无角色</span>'}</div></div>`;
-    }else if(i===all.length){
-      html+=`<div class="map-cell add-slot" onclick="openAddLocationModal(${i})" id="map-cell-add"><div class="add-place-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div style="margin-top:10px;font-size:0.78rem;color:var(--text-muted)">添加新地点</div></div>`;
-    }else{
-      html+=`<div class="map-cell empty"></div>`;
-    }
-  }
-  grid.innerHTML = html;
+function renderMap(){
+  const grid=document.getElementById('map-grid');
+  grid.className='map-grid size-2';
+  grid.innerHTML=Locations.map(loc=>{
+    const charHtml=(loc.characters||[]).map(cid=>{
+      const ch=gameCharacters.find(c=>c.id===cid);
+      return ch?`<span class="char-dot ${ch.gender}" title="${ch.name}">${ch.name[0]}</span>`:'';
+    }).join('');
+    const selected=todayLocation&&todayLocation.id===loc.id;
+    return `<div class="map-cell occupied${selected?' selected':''}" onclick="selectTodayLocation('${loc.id}')" id="map-cell-${loc.id}">
+      <div><div class="location-name">${loc.name}</div><div class="location-desc">${loc.description}</div></div>
+      <div class="location-chars">${charHtml||'<span style="font-size:0.72rem;color:var(--text-muted)">暂无角色</span>'}</div>
+    </div>`;
+  }).join('');
 }
+window.renderMap=renderMap;
 
-function handleCellHover(e,cell){ const r=cell.getBoundingClientRect(); cell.style.setProperty('--mx',((e.clientX-r.left)/r.width*100).toFixed(0)+'%'); cell.style.setProperty('--my',((e.clientY-r.top)/r.height*100).toFixed(0)+'%'); }
-window.handleCellHover = handleCellHover;
+function selectTodayLocation(locId){
+  const loc=Locations.find(l=>l.id===locId);
+  if(!loc)return;
+  todayLocation=loc;
+  gameCharacters[0].status=`${loc.name}内`;
+  dayStarted=false;
+  messagesToday=0;
+  document.getElementById('game-scene-label').textContent=loc.name;
+  document.getElementById('game-msg-counter').textContent='0/50';
+  document.getElementById('game-msg-counter').classList.remove('warning');
 
-function openLocationDetail(locId){
-  const all=getActiveLocations(); const loc=all.find(l=>l.id===locId); if(!loc)return;
-  const panel=document.getElementById('modal-location-panel');
-  const overlay=document.getElementById('modal-location');
-  const chars=(loc.characters||[]).map(cid=>gameCharacters.find(c=>c.id===cid)).filter(Boolean);
-  panel.innerHTML=`
-    <div class="modal-header"><div><div class="modal-location-icon ${loc.type||''}">${loc.icon}</div><div class="modal-title">${loc.name}</div></div><button class="modal-close" onclick="closeModal('modal-location')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-body">
-      <div class="modal-env-desc">${loc.description}</div>
-      ${loc.timeSensitive?`<div style="font-size:0.76rem;color:var(--text-muted);margin-top:-16px;margin-bottom:20px;">${loc.timeSensitive}</div>`:''}
-      <div class="modal-section-title">在场角色</div>
-      <div class="modal-chars-list">${chars.length>0?chars.map(c=>`<div class="modal-char-item"><div class="modal-char-avatar ${c.gender}">${c.name[0]}</div><div><div class="modal-char-name">${c.name}</div><div class="modal-char-status">${c.status}</div></div></div>`).join(''):'<div style="font-size:0.83rem;color:var(--text-muted);padding:12px;">当前没有角色在此地点</div>'}</div>
-      <div class="modal-actions">
-        <button class="modal-action-btn primary" onclick="handleLocationAction('${loc.id}','talk')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>对话</button>
-        <button class="modal-action-btn" onclick="handleLocationAction('${loc.id}','observe')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>仔细观察</button>
-        <button class="modal-action-btn" onclick="handleLocationAction('${loc.id}','move')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>移动到此处</button>
+  // Clear game area
+  const area=document.getElementById('game-text-area');
+  area.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>今日地点已选：「${loc.name}」<br>点击主页「开始今天」或下方直接输入对话</p></div>`;
+  document.getElementById('game-options-area').innerHTML='';
+  document.getElementById('sum-text').textContent='等待今日剧情...';
+  document.getElementById('var-list').innerHTML='<div style="font-size:0.76rem;color:var(--text-muted);">暂无变量</div>';
+  currentOptions=[];
+
+  renderMap();
+  renderHome();
+  showToast(`今日地点已选为「${loc.name}」`,'success');
+}
+window.selectTodayLocation=selectTodayLocation;
+
+// ==================== DIARY ====================
+function renderDiary(){
+  const container=document.getElementById('diary-entries');
+  if(diaryEntries.length===0){
+    container.innerHTML=`<div class="diary-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><p>还没有任何日记条目<br>完成一天后这里会出现每天的剧情摘要</p></div>`;
+    return;
+  }
+  container.innerHTML=diaryEntries.map(e=>`
+    <div class="diary-entry${e.isEvent?' diary-event':''}">
+      <div class="diary-entry-header">
+        <div class="diary-day">第${e.day}天·${e.month}</div>
+        <div class="diary-location">${e.location}</div>
+        ${e.isEvent?'<span class="status-badge ok">关键事件</span>':''}
       </div>
-    </div>`;
-  overlay.classList.add('open');
-}
-window.openLocationDetail = openLocationDetail;
-
-function handleLocationAction(locId,action){
-  const all=getActiveLocations(); const loc=all.find(l=>l.id===locId); if(!loc)return;
-  const messages={talk:`与「${loc.name}」的角色进行对话`,observe:`仔细观察「${loc.name}」的环境`,move:`移动到「${loc.name}」`};
-  closeModal('modal-location');
-  showToast(messages[action]||'执行操作','success');
-  if(action==='move'){
-    const male=gameCharacters.find(c=>c.id==='male');
-    if(male) male.status = `${loc.name}内`;
-    document.getElementById('game-scene-label').textContent = loc.name;
-    renderCharacters();
-  }
-}
-window.handleLocationAction = handleLocationAction;
-
-function openAddLocationModal(idx){
-  const panel=document.getElementById('modal-add-location-panel');
-  const overlay=document.getElementById('modal-add-location');
-  panel.innerHTML=`
-    <div class="modal-header"><div><div class="modal-title">自定义新地点</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;">在空余地块添加一个全新的场景</div></div><button class="modal-close" onclick="closeModal('modal-add-location')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-body">
-      <div class="form-group"><label class="form-label">地点名称</label><input class="form-input" id="input-loc-name" placeholder="例如：图书馆、咖啡厅、体育场..." maxlength="20"></div>
-      <div class="form-group"><label class="form-label">地点类型</label><select class="form-select" id="input-loc-type"><option value="rooftop">户外 · 高处</option><option value="classroom">室内 · 学习</option><option value="park">户外 · 自然</option><option value="teashop">室内 · 休闲</option><option value="other">其他</option></select></div>
-      <div class="form-group"><label class="form-label">环境描述</label><textarea class="form-textarea" id="input-loc-desc" placeholder="描述这个地点的环境氛围..." maxlength="200"></textarea></div>
-      <div class="form-group"><label class="form-label">时间特征</label><input class="form-input" id="input-loc-time" placeholder="例如：夜晚氛围最佳" maxlength="30"></div>
-      <button class="modal-action-btn primary" style="width:100%;justify-content:center;" onclick="confirmAddLocation(${idx})">确认添加</button>
-    </div>`;
-  overlay.classList.add('open');
-}
-window.openAddLocationModal = openAddLocationModal;
-
-function confirmAddLocation(idx){
-  const name=document.getElementById('input-loc-name').value.trim();
-  const type=document.getElementById('input-loc-type').value;
-  const desc=document.getElementById('input-loc-desc').value.trim();
-  const time=document.getElementById('input-loc-time').value.trim();
-  if(!name){showToast('请输入地点名称','warning');return;}
-  if(!desc){showToast('请输入环境描述','warning');return;}
-  const iconMap={rooftop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>',classroom:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',park:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 14l4-4-4-4"/><path d="M3 18v-2a4 4 0 0 1 4-4h4"/></svg>',teashop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>',other:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>'};
-  customLocations.push({id:`custom-${nextLocationId++}`,name,type,description:desc,icon:iconMap[type]||iconMap.other,characters:[],timeSensitive:time||null});
-  closeModal('modal-add-location'); renderMap(); showToast(`新地点「${name}」已添加到地图`,'success');
-}
-window.confirmAddLocation = confirmAddLocation;
-
-function expandMap(){ if(mapSize>=5){showToast('已达到最大地图尺寸 (5x5)','warning');return;} mapSize++; renderMap(); showToast(`地图已扩展为 ${mapSize}x${mapSize}`,'info'); }
-window.expandMap = expandMap;
-
-function resetMap(){ showConfirm('确定要重置地图吗？自定义添加的地点将被清空。',()=>{ mapSize=2; customLocations=[]; renderMap(); showToast('地图已重置','info'); }); }
-window.resetMap = resetMap;
-
-// ==================== STORY ====================
-function renderStory(){
-  document.getElementById('timeline').innerHTML = StoryEntries.map((e,i)=>`
-    <div class="timeline-item" id="timeline-entry-${i}" onclick="handleStoryEntryClick('${e.title}')">
-      <div class="timeline-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${e.time}</div>
-      <div class="timeline-ep-title">${e.title}</div>
-      <div class="timeline-preview">${e.preview}</div>
-      <div class="timeline-location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${e.location}</div>
+      <div class="diary-summary">${escapeHtml(e.summary)}</div>
+      ${e.affectionChange?`<div class="diary-affection">好感度 ${e.affectionChange>0?'+':''}${e.affectionChange}</div>`:''}
     </div>`).join('');
 }
-function handleStoryEntryClick(title){ showToast(`回顾剧情：「${title}」`,'info'); }
-window.handleStoryEntryClick = handleStoryEntryClick;
+window.renderDiary=renderDiary;
 
 // ==================== CHARACTERS ====================
 function renderCharacters(){
-  document.getElementById('chars-grid').innerHTML = gameCharacters.map(c=>{
-    const ap=c.affectionMax>0?(c.affection/c.affectionMax*100):0;
-    const ac=ap>40?'high':'medium';
-    return `<div class="char-profile-card ${c.gender}" id="char-card-${c.id}" onclick="openCharacterDetail('${c.id}')">
-      <div class="char-profile-top"><div class="char-profile-avatar ${c.gender}">${c.name[0]}</div><div><div class="char-profile-name">${c.name}</div><div class="char-profile-trait">${c.role}</div></div></div>
-      <div class="char-detail-row"><span class="char-detail-label">性格特征</span><span class="char-detail-value">${c.traits}</span></div>
-      <div class="char-detail-row"><span class="char-detail-label">生日</span><span class="char-detail-value">${c.birthday}</span></div>
-      <div class="char-detail-row"><span class="char-detail-label">身高</span><span class="char-detail-value">${c.height}</span></div>
-      <div class="char-detail-row"><span class="char-detail-label">所属</span><span class="char-detail-value">${c.affiliation}</span></div>
-      <div class="char-detail-row"><span class="char-detail-label">当前状态</span><span class="char-detail-value">${c.status}</span></div>
-      <div class="char-affection-bar"><div class="char-affection-fill ${ac}" style="width:${ap}%"></div></div>
-      <div class="char-affection-label"><span>好感度</span><span>${c.affection} / ${c.affectionMax}</span></div></div>`;
-  }).join('');
-  renderProtagonists();
-}
+  const aff=gameCharacters[1].affection;
+  const lbl=getAffectionLabel(aff);
+  const pct=Math.min(100,Math.max(0,aff));
 
-function openCharacterDetail(charId){
-  const c=gameCharacters.find(ch=>ch.id===charId); if(!c)return;
-  const panel=document.getElementById('modal-char-detail-panel');
-  const overlay=document.getElementById('modal-char-detail');
-  const ap=c.affectionMax>0?(c.affection/c.affectionMax*100):0;
-  panel.innerHTML=`
-    <div class="modal-header"><div style="display:flex;align-items:center;gap:14px;"><div class="modal-char-avatar ${c.gender}" style="width:44px;height:44px;font-size:1rem;">${c.name[0]}</div><div><div class="modal-title">${c.name}</div><div style="font-size:0.78rem;color:var(--text-muted);">${c.role}</div></div></div><button class="modal-close" onclick="closeModal('modal-char-detail')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="modal-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
-        <div style="background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:12px;"><div style="font-size:0.73rem;color:var(--text-muted);">生日</div><div style="font-weight:500;">${c.birthday}</div></div>
-        <div style="background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:12px;"><div style="font-size:0.73rem;color:var(--text-muted);">身高</div><div style="font-weight:500;">${c.height}</div></div>
-        <div style="background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:12px;"><div style="font-size:0.73rem;color:var(--text-muted);">所属</div><div style="font-weight:500;">${c.affiliation}</div></div>
-        <div style="background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:12px;"><div style="font-size:0.73rem;color:var(--text-muted);">当前所在</div><div style="font-weight:500;">${c.status}</div></div>
-      </div>
-      <div style="margin-bottom:14px;"><div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:3px;">性格特征</div><div style="font-size:0.88rem;">${c.traits}</div></div>
-      <div style="margin-bottom:14px;"><div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:3px;">喜好</div><div style="font-size:0.88rem;">${c.likes}</div></div>
-      <div style="margin-top:18px;"><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:0.78rem;color:var(--text-muted);">好感度</span><span style="font-size:0.88rem;font-weight:600;">${c.affection} / ${c.affectionMax}</span></div><div class="char-affection-bar" style="height:6px;"><div class="char-affection-fill ${ap>40?'high':'medium'}" style="width:${ap}%"></div></div></div>
-    </div>`;
-  overlay.classList.add('open');
-}
-window.openCharacterDetail = openCharacterDetail;
-
-function renderProtagonists(){
-  const grid = document.getElementById('protagonists-grid');
-  if(!grid) return;
-  grid.innerHTML = gameCharacters.map(c=>{
-    const isMale = c.gender==='male';
-    return `<div class="protag-card ${c.gender}" onclick="openCharacterDetail('${c.id}')" id="protag-${c.id}">
-      <div class="protag-header"><div class="protag-avatar">${c.name[0]}</div><div class="protag-info"><h3>${c.name}</h3><p class="protag-role">${c.role}</p></div></div>
-      <div class="protag-stats">
-        ${isMale?`
-          <div class="stat-item"><div class="stat-label">故事进度</div><div class="stat-value">第一章</div><div class="stat-bar-wrap"><div class="stat-bar-fill progress" style="width:25%"></div></div></div>
-          <div class="stat-item"><div class="stat-label">当前状态</div><div class="stat-value">${c.status}</div></div>`:`
-          <div class="stat-item"><div class="stat-label">好感度</div><div class="stat-value">${c.affection} / ${c.affectionMax}</div><div class="stat-bar-wrap"><div class="stat-bar-fill affection" style="width:${c.affectionMax>0?c.affection/c.affectionMax*100:0}%"></div></div></div>
-          <div class="stat-item"><div class="stat-label">当前状态</div><div class="stat-value">${c.status}</div></div>`}
-        <div class="stat-item"><div class="stat-label">关键事件</div><div class="stat-value">${isMale?'3 / 8':'5 次'}</div></div>
-      </div>
+  document.getElementById('chars-grid').innerHTML=gameCharacters.map(c=>{
+    const isFemale=c.gender==='female';
+    return `<div class="char-card">
+      <div class="char-card-top"><div class="char-avatar ${c.gender}">${c.name[0]}</div><div><div class="char-name">${c.name}</div><div class="char-role">${c.role}</div></div></div>
+      <div class="char-row"><span class="char-row-label">性格特征</span><span class="char-row-value">${c.traits}</span></div>
+      <div class="char-row"><span class="char-row-label">生日</span><span class="char-row-value">${c.birthday}</span></div>
+      <div class="char-row"><span class="char-row-label">身高</span><span class="char-row-value">${c.height}</span></div>
+      <div class="char-row"><span class="char-row-label">所属</span><span class="char-row-value">${c.affiliation}</span></div>
+      <div class="char-row"><span class="char-row-label">喜好</span><span class="char-row-value">${c.likes}</span></div>
+      <div class="char-row"><span class="char-row-label">当前所在</span><span class="char-row-value">${c.status}</span></div>
+      ${isFemale?`
+      <div class="char-affection-bar"><div class="char-affection-fill" style="width:${pct}%"></div></div>
+      <div class="char-affection-num"><span>好感度</span><span>${aff} / 100</span></div>
+      <div class="affection-ladder">${AFFECTION_LADDER.map(l=>`<div class="ladder-step${l.label===lbl.label?' active':''}">${l.label}</div>`).join('')}</div>
+      <div style="font-size:0.74rem;color:var(--text-secondary);margin-top:6px;">当前：${lbl.desc}</div>`:''}
     </div>`;
   }).join('');
 }
+window.renderCharacters=renderCharacters;
 
-// ==================== GAME PAGE (LLM) ====================
-async function handleGameSend(){
-  const input = document.getElementById('game-input');
-  const text = input.value.trim();
-  if(!text) return;
+// ==================== DAY FLOW ====================
+async function beginDayDialogue(){
+  if(!storeReady){showToast('系统尚未就绪','warning');return;}
+  const st=sillytavernStore;
+  if(!st.settings?.api?.apiKey){showToast('请先在设置中配置 API Key','warning');openSettingsModal();return;}
+  if(!todayLocation){showToast('请先选择今日地点','warning');return;}
 
-  if(!storeReady){
-    showToast('系统正在初始化，请稍候...','warning');
-    return;
+  dayStarted=true;
+  messagesToday=0;
+  document.getElementById('game-msg-counter').textContent='0/50';
+  document.getElementById('game-msg-counter').classList.remove('warning');
+
+  // Create or get active chat
+  if(!st.activeChatId){
+    try{await st.createChat(`${getMonth()}·${todayLocation.name}`);}catch(e){showToast('创建会话失败: '+e.message,'warning');return;}
   }
 
-  const st = sillytavernStore;
-  if(!st.settings?.api?.apiKey){
-    showToast('请先在设置中配置 API Key','warning');
-    openSettingsModal();
-    return;
-  }
+  const area=document.getElementById('game-text-area');
+  area.innerHTML='';
+  document.getElementById('game-options-area').innerHTML='';
+  document.getElementById('game-loading').style.display='block';
+  document.getElementById('game-scene-label').textContent=todayLocation.name;
+  document.getElementById('game-empty-msg').textContent='正在生成今日开场叙事...';
 
-  // Create chat if none active
-  if(!st.activeChatId) {
-    try { await st.createChat(); } catch(e) { showToast('创建会话失败: ' + e.message, 'warning'); return; }
-  }
+  const month=getMonth();
+  const evt=getKeyEvent(currentDay);
+  const female=gameCharacters[1];
+  const affLbl=getAffectionLabel(female.affection);
 
-  input.value = '';
-  input.disabled = true;
-  document.getElementById('game-send-btn').disabled = true;
-  document.getElementById('game-options-area').innerHTML = '';
-  currentOptions = [];
+  const dayPrompt=`今天是第${currentDay}天·${month}。《心之回响》的校园故事正在展开。
+${evt?`本阶段关键词：${evt.name} — ${evt.desc}`:''}
+当前场景：${todayLocation.name}。${todayLocation.description}
+角色状态：林澈与苏晚晴的关系为「${affLbl.label}」，好感度 ${female.affection}/100。${affLbl.desc}。
 
-  document.getElementById('game-loading').style.display = 'block';
+请以剧情旁白+女主角苏晚晴的混合叙事视角，写出今天在${todayLocation.name}的开场叙事。描述场景氛围和苏晚晴的状态/行动。然后给出2-3个选项，推动接下来的剧情发展。
 
-  try {
-    const st = sillytavernStore;
-    const settings = st.settings;
-    const activeChat = st.activeChat;
-    if(!settings || !activeChat) throw new Error('No active context');
+务必严格按照格式输出：<maintext>、<option>、<sum>、<vars>。`;
 
-    const activePreset = st.presets.find(p=>p.id===settings.activePresetId) || st.presets[0];
-    if(!activePreset) throw new Error('No preset available');
+  try{
+    const settings=st.settings;
+    const activeChat=st.activeChat;
+    const activePreset=st.presets.find(p=>p.id===settings.activePresetId)||st.presets[0];
+    const activeBooks=st.lorebooks.filter(b=>st.activeLorebookIds.includes(b.id));
+    const currentVars=activeChat?.variables||{};
 
-    const activeBooks = st.lorebooks.filter(b=>st.activeLorebookIds.includes(b.id));
-    const currentVars = activeChat.variables || {};
+    const userMsg={id:crypto.randomUUID(),role:'user',content:`第${currentDay}天·${month}，林澈来到了${todayLocation.name}。`,timestamp:Date.now(),variables:{...currentVars}};
+    const updatedMsgs=[...(activeChat?.messages||[]),userMsg];
 
-    const userMsg = { id: crypto.randomUUID(), role: 'user', content: text, timestamp: Date.now(), variables: { ...currentVars } };
-    const updatedMsgs = [...activeChat.messages, userMsg];
-
-    const { messages: promptMsgs } = assemblePrompt({
-      userInput: text,
-      history: updatedMsgs,
-      preset: activePreset,
-      lorebooks: activeBooks,
-      userName: settings.userName || '林澈',
-      characterName: settings.characterName || '苏晚晴',
-      variables: currentVars,
-      formatPrompt: GAME_SYSTEM_PROMPT,
+    const {messages:promptMsgs}=assemblePrompt({
+      userInput:userMsg.content,history:updatedMsgs,preset:activePreset||{},
+      lorebooks:activeBooks||[],userName:settings.userName||'林澈',
+      characterName:settings.characterName||'苏晚晴',
+      variables:currentVars,formatPrompt:GAME_SYSTEM_PROMPT+'\n\n'+dayPrompt,
     });
 
-    const body = {
-      model: settings.api.model || activePreset.settings.openai_model || 'gpt-3.5-turbo',
-      messages: promptMsgs,
-      temperature: activePreset.settings.temp_openai ?? 0.9,
-      max_tokens: activePreset.settings.openai_max_tokens ?? 2048,
-      top_p: activePreset.settings.top_p_openai ?? 0.95,
-      frequency_penalty: activePreset.settings.freq_pen_openai ?? 0,
-      presence_penalty: activePreset.settings.pres_pen_openai ?? 0,
-      stream: false,
-    };
+    const resp=await fetch(`${settings.api.baseUrl}/chat/completions`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${settings.api.apiKey}`},body:JSON.stringify({model:settings.api.model||'gpt-3.5-turbo',messages:promptMsgs,temperature:0.9,max_tokens:2048})});
+    if(!resp.ok)throw new Error(`API error ${resp.status}: ${await resp.text().then(t=>t.slice(0,200))}`);
+    const data=await resp.json();
+    const rawReply=data.choices?.[0]?.message?.content||'';
 
-    const resp = await fetch(`${settings.api.baseUrl}/chat/completions`, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${settings.api.apiKey}` },
-      body: JSON.stringify(body),
-    });
+    const parser=makeParser();
+    const parsed=aggregateEvents([...parser.feed(rawReply),...parser.finish()]);
+    const maintext=parsed.maintext||rawReply;
+    const thinking=parsed.thinking||'';
+    const options=(parsed.options||[]).filter(o=>o.trim());
+    const sum=parsed.sum||'';
+    const {nextVariables}=applyParsedToChat(currentVars,parsed);
 
-    if(!resp.ok) throw new Error(`API error ${resp.status}: ${await resp.text().then(t=>t.slice(0,300))}`);
-
-    const data = await resp.json();
-    const rawReply = data.choices?.[0]?.message?.content || '';
-
-    const parser = makeParser();
-    const events = parser.feed(rawReply);
-    const finalEvents = parser.finish();
-    const parsed = aggregateEvents([...events, ...finalEvents]);
-
-    const maintext = parsed.maintext || rawReply;
-    const options = (parsed.options && parsed.options.length > 0) ? parsed.options.filter(o=>o.trim()) : [];
-    const thinking = parsed.thinking || '';
-    const sum = parsed.sum || '';
-
-    const { nextVariables } = applyParsedToChat(currentVars, parsed);
-
-    const assistantMsg = {
-      id: crypto.randomUUID(), role: 'assistant', content: rawReply, timestamp: Date.now(),
-      variables: { ...nextVariables },
-      parsed: { maintext, options, thinking, sum, varsRaw: parsed.varsRaw, varsCommands: parsed.varsCommands, unknown: parsed.unknown },
-    };
-
-    const chats = await getChats();
-    const chat = chats.find(c=>c.id===activeChat.id);
-    if(chat){
-      const updatedChat = { ...chat, messages: [...updatedMsgs, assistantMsg], variables: nextVariables, updatedAt: Date.now() };
-      await saveChat(updatedChat);
-    }
-
+    const assistantMsg={id:crypto.randomUUID(),role:'assistant',content:rawReply,timestamp:Date.now(),variables:{...nextVariables},parsed:{maintext,options,thinking,sum}};
+    const chats=await getChats();const chat=chats.find(c=>c.id===activeChat?.id);
+    if(chat){await saveChat({...chat,messages:[...updatedMsgs,assistantMsg],variables:nextVariables,updatedAt:Date.now()});}
     await st.loadAll();
-    const freshChats = await getChats();
-    const freshChat = freshChats.find(c=>c.id===activeChat.id);
-    if(freshChat) st.loadChat(freshChat.id);
 
-    // Full re-render — no manual DOM append
-    const area = document.getElementById('game-text-area');
-    area.innerHTML = '';
-    refreshGameUI();
+    // Render
+    area.innerHTML='';
+    if(thinking)appendGameMessage('assistant',maintext,{thinking});
+    else appendGameMessage('assistant',maintext,null);
+    if(options.length>0){currentOptions=options;renderGameOptions(options);}
+    renderGameVars(nextVariables);
+    if(sum)document.getElementById('sum-text').textContent=sum;
+    messagesToday=1;
 
-    if(options.length > 0){
-      currentOptions = options;
-      renderGameOptions(options);
+  }catch(e){showToast('开场生成失败: '+e.message,'warning');area.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>开场生成失败，请检查 API 配置后重试</p></div>`;dayStarted=false;}
+  finally{document.getElementById('game-loading').style.display='none';}
+
+  navigateTo('game');
+  renderHome();
+}
+window.beginDayDialogue=beginDayDialogue;
+
+async function endCurrentDay(){
+  if(!dayStarted){showToast('今天尚未开始','warning');return;}
+
+  document.getElementById('game-loading').style.display='block';
+  document.getElementById('game-input').disabled=true;
+  document.getElementById('game-send-btn').disabled=true;
+
+  try{
+    const st=sillytavernStore;
+    const settings=st.settings;
+    const activeChat=st.activeChat;
+    if(!settings||!activeChat)throw new Error('No context');
+
+    const month=getMonth();
+    const evt=getKeyEvent(currentDay);
+    const endPrompt=`第${currentDay}天·${month}「${todayLocation?.name||'未知地点'}」的剧情已结束。${evt?`本日关键事件「${evt.name}」已触发。`:''}
+请以旁白视角写一段优美的日结摘要，概括今天发生的主要事件和情感变化。不需要选项，只需要<sum>和<maintext>标签。同时更新<vars>中的好感度。`;
+
+    const activePreset=st.presets.find(p=>p.id===settings.activePresetId)||st.presets[0];
+    const currentVars=activeChat.variables||{};
+    const userMsg={id:crypto.randomUUID(),role:'user',content:`今天结束了。`,timestamp:Date.now(),variables:{...currentVars}};
+
+    const {messages:promptMsgs}=assemblePrompt({
+      userInput:userMsg.content,history:[...activeChat.messages,userMsg],
+      preset:activePreset||{},lorebooks:st.lorebooks.filter(b=>st.activeLorebookIds.includes(b.id)),
+      userName:settings.userName||'林澈',characterName:settings.characterName||'苏晚晴',
+      variables:currentVars,formatPrompt:GAME_SYSTEM_PROMPT,
+    });
+
+    const resp=await fetch(`${settings.api.baseUrl}/chat/completions`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${settings.api.apiKey}`},body:JSON.stringify({model:settings.api.model||'gpt-3.5-turbo',messages:promptMsgs,temperature:0.9,max_tokens:1024})});
+    if(!resp.ok)throw new Error(`API error: ${resp.status}`);
+    const data=await resp.json();
+    const rawReply=data.choices?.[0]?.message?.content||'';
+
+    const parser=makeParser();
+    const parsed=aggregateEvents([...parser.feed(rawReply),...parser.finish()]);
+    const summary=parsed.sum||parsed.maintext||rawReply.slice(0,200);
+    const {nextVariables}=applyParsedToChat(currentVars,parsed);
+
+    // Save to chat
+    const chats=await getChats();
+    const chat=chats.find(c=>c.id===activeChat.id);
+    if(chat){
+      const assistantMsg={id:crypto.randomUUID(),role:'assistant',content:rawReply,timestamp:Date.now(),variables:{...nextVariables},parsed:{maintext:summary,options:[],thinking:'',sum:summary}};
+      await saveChat({...chat,messages:[...chat.messages,userMsg,assistantMsg],variables:nextVariables,updatedAt:Date.now()});
+    }
+    await st.loadAll();
+
+    // Save diary
+    const oldAff=gameCharacters[1].affection;
+    const affChange=nextVariables['好感度']?parseInt(nextVariables['好感度']):0;
+    gameCharacters[1].affection=Math.min(100,Math.max(0,oldAff+affChange));
+    const milestone=checkMilestone(oldAff,gameCharacters[1].affection);
+    const isEvent=milestone||!!evt;
+    if(milestone)diaryEntries.push({day:currentDay,month,location:todayLocation?.name||'未知',summary:`${milestone.label} — 关系发生了变化`,affectionChange:affChange,isEvent:true});
+
+    diaryEntries.push({day:currentDay,month,location:todayLocation?.name||'未知',summary,affectionChange:affChange,isEvent});
+    previousAffection=gameCharacters[1].affection;
+
+    // Advance day
+    currentDay++;
+    if(currentDay>8){
+      const totalAff=gameCharacters[1].affection;
+      let ending='';
+      if(totalAff>=95)ending='恋人结局 — 樱花树下的告白';
+      else if(totalAff>=70)ending='好友结局 — 各自珍重但不会忘记';
+      else if(totalAff>=30)ending='相识结局 — 回到原来的生活';
+      else ending='擦肩而过 — 彼此只是匆匆的过客';
+      diaryEntries.push({day:9,month:'终章',location:'樱花树下',summary:`故事走到了终点。${ending}`,affectionChange:0,isEvent:true});
+      showToast(`游戏结束 — ${ending}`,'success');
+      currentDay=8; // Cap at day 8
     }
 
-    renderGameVars(nextVariables);
-    if(sum) document.getElementById('sum-text').textContent = sum;
+    todayLocation=null;
+    dayStarted=false;
+    messagesToday=0;
+    document.getElementById('game-msg-counter').textContent='0/50';
+    document.getElementById('game-scene-label').textContent='今日已结束';
+    document.getElementById('sum-text').textContent='今日已结算，可进入下一天';
+    document.getElementById('game-options-area').innerHTML='';
+    document.getElementById('game-text-area').innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>今日剧情已结束<br>「${summary}」<br>前往主页开始新的一天</p></div>`;
 
-  } catch(e) {
-    const errMsg = e.message || String(e);
-    const suggestion = errMsg.includes('invalid_request_error') ? ' (模型名错误，请在设置中配置正确模型或到预设编辑器中修改)' :
-      errMsg.includes('401') ? ' (API Key 无效，请在设置中配置)' :
-      errMsg.includes('404') ? ' (API 地址错误，请检查设置中的 Base URL)' : '';
-    showToast('请求失败: ' + errMsg + suggestion, 'warning');
-  } finally {
-    document.getElementById('game-loading').style.display = 'none';
-    document.getElementById('game-input').disabled = false;
-    document.getElementById('game-send-btn').disabled = false;
+    renderHome();renderDiary();renderCharacters();
+
+    if(milestone)showToast(`关系变化：${milestone.label}`, 'success');
+    if(evt)showToast(`关键事件：${evt.name}`, 'info');
+
+  }catch(e){showToast('日结失败: '+e.message,'warning');}
+  finally{
+    document.getElementById('game-loading').style.display='none';
+    document.getElementById('game-input').disabled=false;
+    document.getElementById('game-send-btn').disabled=false;
+  }
+}
+window.endCurrentDay=endCurrentDay;
+
+// ==================== GAME CHAT ====================
+async function handleGameSend(){
+  if(!storeReady){showToast('系统尚未就绪','warning');return;}
+  const st=sillytavernStore;
+  if(!st.settings?.api?.apiKey){showToast('请先配置 API Key','warning');openSettingsModal();return;}
+  if(!todayLocation||!dayStarted){showToast('请先在主页选择地点并开始今天','warning');return;}
+  if(!st.activeChatId){try{await st.createChat();}catch(e){showToast('创建会话失败','warning');return;}}
+
+  const input=document.getElementById('game-input');
+  const text=input.value.trim();
+  if(!text)return;
+
+  input.value='';input.disabled=true;
+  document.getElementById('game-send-btn').disabled=true;
+  document.getElementById('game-options-area').innerHTML='';
+  currentOptions=[];
+  document.getElementById('game-loading').style.display='block';
+
+  try{
+    const settings=st.settings;
+    const activeChat=st.activeChat;
+    const activePreset=st.presets.find(p=>p.id===settings.activePresetId)||st.presets[0];
+    const activeBooks=st.lorebooks.filter(b=>st.activeLorebookIds.includes(b.id));
+    const currentVars=activeChat?.variables||{};
+    const month=getMonth();
+    const evt=getKeyEvent(currentDay);
+    const affLbl=getAffectionLabel(gameCharacters[1].affection);
+
+    const contextPrompt=`当前为第${currentDay}天·${month}，地点「${todayLocation.name}」。${evt?`关键事件「${evt.name}」正在进行。`:''}苏晚晴与林澈的关系为「${affLbl.label}」。`;
+
+    const userMsg={id:crypto.randomUUID(),role:'user',content:text,timestamp:Date.now(),variables:{...currentVars}};
+    const updatedMsgs=[...(activeChat?.messages||[]),userMsg];
+
+    const {messages:promptMsgs}=assemblePrompt({
+      userInput:text,history:updatedMsgs,preset:activePreset||{},
+      lorebooks:activeBooks||[],userName:settings.userName||'林澈',
+      characterName:settings.characterName||'苏晚晴',
+      variables:currentVars,formatPrompt:GAME_SYSTEM_PROMPT+'\n\n'+contextPrompt,
+    });
+
+    const resp=await fetch(`${settings.api.baseUrl}/chat/completions`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${settings.api.apiKey}`},body:JSON.stringify({model:settings.api.model||'gpt-3.5-turbo',messages:promptMsgs,temperature:0.9,max_tokens:2048})});
+    if(!resp.ok)throw new Error(`API error ${resp.status}: ${await resp.text().then(t=>t.slice(0,300))}`);
+    const data=await resp.json();
+    const rawReply=data.choices?.[0]?.message?.content||'';
+
+    const parser=makeParser();
+    const parsed=aggregateEvents([...parser.feed(rawReply),...parser.finish()]);
+    const maintext=parsed.maintext||rawReply;
+    const options=(parsed.options||[]).filter(o=>o.trim());
+    const thinking=parsed.thinking||'';
+    const sum=parsed.sum||'';
+    const {nextVariables}=applyParsedToChat(currentVars,parsed);
+
+    const assistantMsg={id:crypto.randomUUID(),role:'assistant',content:rawReply,timestamp:Date.now(),variables:{...nextVariables},parsed:{maintext,options,thinking,sum}};
+    const chats=await getChats();const chat=chats.find(c=>c.id===activeChat?.id);
+    if(chat){await saveChat({...chat,messages:[...updatedMsgs,assistantMsg],variables:nextVariables,updatedAt:Date.now()});}
+    await st.loadAll();
+
+    messagesToday++;
+    document.getElementById('game-msg-counter').textContent=`${messagesToday}/${MAX_MESSAGES_PER_DAY}`;
+    if(messagesToday>=MAX_MESSAGES_PER_DAY*0.8)document.getElementById('game-msg-counter').classList.add('warning');
+
+    // Render
+    const area=document.getElementById('game-text-area');
+    const empties=area.querySelectorAll('.empty-state');empties.forEach(e=>e.remove());
+    appendGameMessage('user',text,null);
+    if(thinking)appendGameMessage('assistant',maintext,{thinking});
+    else appendGameMessage('assistant',maintext,null);
+
+    if(options.length>0){currentOptions=options;renderGameOptions(options);}
+    renderGameVars(nextVariables);
+    if(sum)document.getElementById('sum-text').textContent=sum;
+
+    // Check if should force end day
+    if(messagesToday>=MAX_MESSAGES_PER_DAY){
+      showToast('今日对话已达上限，正在结算...','info');
+      setTimeout(()=>endCurrentDay(),500);
+    }
+
+    // Update affection from vars
+    const affChange=nextVariables['好感度']?parseInt(nextVariables['好感度']):0;
+    if(affChange!==0){
+      const oldAff=gameCharacters[1].affection;
+      gameCharacters[1].affection=Math.min(100,Math.max(0,oldAff+affChange));
+      const milestone=checkMilestone(oldAff,gameCharacters[1].affection);
+      if(milestone)showToast(`关系变化：「${milestone.label}」`, 'success');
+      previousAffection=gameCharacters[1].affection;
+      renderHome();
+      renderCharacters();
+    }
+
+  }catch(e){
+    const errMsg=e.message||String(e);
+    const sug=errMsg.includes('invalid_request_error')?' (模型名错误)':errMsg.includes('401')?' (Key无效)':errMsg.includes('404')?' (地址错误)':'';
+    showToast('请求失败: '+errMsg+sug,'warning');
+  }finally{
+    document.getElementById('game-loading').style.display='none';
+    document.getElementById('game-input').disabled=false;
+    document.getElementById('game-send-btn').disabled=false;
     document.getElementById('game-input').focus();
   }
 }
-window.handleGameSend = handleGameSend;
+window.handleGameSend=handleGameSend;
 
-function handleGameInputKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); handleGameSend(); } }
-window.handleGameInputKey = handleGameInputKey;
+function handleGameInputKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleGameSend();}}
+window.handleGameInputKey=handleGameInputKey;
 
-function appendGameMessage(role, text, meta){
-  const area = document.getElementById('game-text-area');
-  const empty = area.querySelector('.empty-state');
-  if(empty) empty.style.display = 'none';
-  const msgId = 'gm-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
-  const div = document.createElement('div');
-  div.className = `game-msg ${role}`;
-  div.id = msgId;
-
-  let thinkingHtml = '';
+function appendGameMessage(role,text,meta){
+  const area=document.getElementById('game-text-area');
+  const empties=area.querySelectorAll('.empty-state');empties.forEach(e=>e.remove());
+  const msgId='gm-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+  const div=document.createElement('div');div.className=`game-msg ${role}`;div.id=msgId;
+  let thinkingHtml='';
   if(meta?.thinking){
-    thinkingHtml = `
-      <div class="msg-thinking-toggle" onclick="toggleThinking('${msgId}')" id="${msgId}-toggle">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>思考过程
-      </div>
-      <div class="msg-thinking-content" id="${msgId}-thinking">${escapeHtml(meta.thinking)}</div>`;
+    thinkingHtml=`<div class="msg-thinking-toggle" onclick="window.toggleThinking&&window.toggleThinking('${msgId}')" id="${msgId}-toggle"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>思考过程</div><div class="msg-thinking-content" id="${msgId}-thinking">${escapeHtml(meta.thinking)}</div>`;
   }
-
-  const roleLabel = role==='user'?'你':(meta?.raw?.includes('<maintext>')?'剧情':'回应');
-  div.innerHTML = `<div class="msg-role">${roleLabel}</div><div class="msg-content">${escapeHtml(text)}</div>${thinkingHtml}`;
+  const roleLabel=role==='user'?'林澈':'剧情';
+  div.innerHTML=`<div class="msg-role">${roleLabel}</div><div class="msg-content">${escapeHtml(text)}</div>${thinkingHtml}`;
   area.appendChild(div);
-  div.scrollIntoView({ behavior:'smooth', block:'end' });
+  div.scrollIntoView({behavior:'smooth',block:'end'});
 }
-window.appendGameMessage = appendGameMessage;
+window.appendGameMessage=appendGameMessage;
 
-function toggleThinking(msgId){
-  const thinking = document.getElementById(msgId+'-thinking');
-  if(thinking) thinking.classList.toggle('open');
-}
-window.toggleThinking = toggleThinking;
+function toggleThinking(msgId){const el=document.getElementById(msgId+'-thinking');if(el)el.classList.toggle('open');}
+window.toggleThinking=toggleThinking;
 
-function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function escapeHtml(s){const d=document.createElement('div');d.textContent=s!=null?String(s):'';return d.innerHTML;}
 
 function renderGameOptions(options){
-  const area = document.getElementById('game-options-area');
-  area.innerHTML = options.map((o,i)=>`<button class="game-option-btn" onclick="selectGameOption(${i})" id="game-option-${i}">${escapeHtml(o)}</button>`).join('');
+  document.getElementById('game-options-area').innerHTML=options.map((o,i)=>`<button class="game-option-btn" onclick="selectGameOption(${i})" id="game-option-${i}">${escapeHtml(o)}</button>`).join('');
 }
 function selectGameOption(idx){
-  const text = currentOptions[idx];
-  if(!text) return;
-  document.getElementById('game-input').value = text;
-  document.getElementById('game-options-area').innerHTML = '';
-  currentOptions = [];
+  const text=currentOptions[idx];if(!text)return;
+  document.getElementById('game-input').value=text;
+  document.getElementById('game-options-area').innerHTML='';
+  currentOptions=[];
   handleGameSend();
 }
-window.selectGameOption = selectGameOption;
+window.selectGameOption=selectGameOption;
 
 function renderGameVars(vars){
-  const container = document.getElementById('var-list');
-  const entries = Object.entries(vars||{});
-  if(entries.length===0){
-    container.innerHTML = '<div style="font-size:0.78rem;color:var(--text-muted);">暂无变量</div>';
-    return;
-  }
-  container.innerHTML = entries.map(([k,v])=>`<div class="var-row"><span class="var-name">${escapeHtml(k)}</span><span class="var-value">${escapeHtml(String(v))}</span></div>`).join('');
+  const container=document.getElementById('var-list');
+  const entries=Object.entries(vars||{}).filter(([k])=>k!=='好感度');
+  const aff=vars?.['好感度'];
+  if(aff!==undefined)entries.unshift(['好感度',aff]);
+  if(entries.length===0){container.innerHTML='<div style="font-size:0.76rem;color:var(--text-muted);">暂无变量</div>';return;}
+  container.innerHTML=entries.map(([k,v])=>`<div class="var-row"><span class="var-name">${escapeHtml(k)}</span><span class="var-value">${escapeHtml(String(v))}</span></div>`).join('');
 }
-
-async function handleCreateChat(){
-  if(!storeReady){ showToast('系统尚未就绪','warning'); return; }
-  try {
-    const st = sillytavernStore;
-    const name = `${st.settings?.characterName||'角色'} - 新对话 ${st.chats.length+1}`;
-    await st.createChat(name);
-    await st.loadAll();
-    showToast('新会话已创建','success');
-    const area = document.getElementById('game-text-area');
-    area.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>输入你的行动，或者点击预设选项开始故事...</p></div>`;
-    document.getElementById('game-options-area').innerHTML = '';
-    document.getElementById('var-list').innerHTML = '<div style="font-size:0.78rem;color:var(--text-muted);">暂无变量</div>';
-    document.getElementById('sum-text').textContent = '等待剧情发展...';
-    refreshGameUI();
-  } catch(e){ showToast('创建失败: '+e.message,'warning'); }
-}
-window.handleCreateChat = handleCreateChat;
 
 function refreshGameUI(){
-  const st = sillytavernStore;
-  const list = document.getElementById('chat-session-list');
-  if(!st.chats.length){
-    list.innerHTML = '<div style="font-size:0.78rem;color:var(--text-muted);padding:8px;">暂无会话</div>';
-  } else {
-    list.innerHTML = st.chats.map(c=>`
-      <div class="chat-session-item ${c.id===st.activeChatId?'active':''}" id="session-${c.id}" onclick="handleSelectChat('${c.id}')">
-        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(c.name||'未命名')}</span>
-        <button class="session-del-btn" onclick="event.stopPropagation();handleDeleteChat('${c.id}')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>`).join('');
-  }
-
-  // Load chat messages
-  const activeChat = st.activeChat;
-  if(activeChat && activeChat.messages.length > 0){
-    const area = document.getElementById('game-text-area');
-    // Remove any lingering empty-state divs
-    const empties = area.querySelectorAll('.empty-state');
-    empties.forEach(e=>e.remove());
-    // Show last few messages
-    const recent = activeChat.messages.slice(-12);
-    for(const msg of recent){
-      const existing = document.getElementById('gm-rendered-'+msg.id);
-      if(!existing){
-        const role = msg.role;
-        const parsed = msg.parsed;
-        if(parsed && parsed.maintext){
-          appendGameMessage(role, parsed.maintext, { thinking: parsed.thinking, sum: parsed.sum });
-        } else {
-          appendGameMessage(role, msg.content.slice(0,800), null);
-        }
-        const lastDiv = area.lastElementChild;
-        if(lastDiv) lastDiv.id = 'gm-rendered-'+msg.id;
-      }
-    }
-    // Vars
-    renderGameVars(activeChat.variables||{});
-    // Summary from last message
-    const lastMsg = activeChat.messages[activeChat.messages.length-1];
-    if(lastMsg?.parsed?.sum) document.getElementById('sum-text').textContent = lastMsg.parsed.sum;
-  } else {
-    // No messages — show empty state
-    const area = document.getElementById('game-text-area');
-    if(!area.querySelector('.empty-state')){
-      area.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>输入你的行动，或者点击预设选项开始故事...</p></div>`;
-    }
-  }
-
-  document.getElementById('game-scene-info').textContent = st.settings?.api?.model ? `模型: ${st.settings.api.model}` : '';
+  const st=sillytavernStore;
+  // Session list removed - simplified
+  document.getElementById('game-day-label').textContent=`第${currentDay}天·${getMonth()}`;
+  document.getElementById('game-scene-label').textContent=todayLocation?todayLocation.name:(dayStarted?'进行中':'未开始');
+  document.getElementById('game-msg-counter').textContent=`${messagesToday}/${MAX_MESSAGES_PER_DAY}`;
 }
-window.refreshGameUI = refreshGameUI;
-
-async function handleSelectChat(id){
-  sillytavernStore.loadChat(id);
-  await sillytavernStore.loadAll();
-  const area = document.getElementById('game-text-area');
-  area.innerHTML = '';
-  document.getElementById('game-options-area').innerHTML = '';
-  refreshGameUI();
-}
-window.handleSelectChat = handleSelectChat;
-
-async function handleDeleteChat(id){
-  showConfirm('确定要删除此会话吗？此操作不可撤销。', async ()=>{
-    await sillytavernStore.deleteChat(id);
-    await sillytavernStore.loadAll();
-    const area = document.getElementById('game-text-area');
-    area.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>输入你的行动，或者点击预设选项开始故事...</p></div>`;
-    refreshGameUI();
-    showToast('会话已删除','info');
-  });
-}
-window.handleDeleteChat = handleDeleteChat;
+window.refreshGameUI=refreshGameUI;
 
 // ==================== SETTINGS MODAL ====================
 async function openSettingsModal(){
-  const st = sillytavernStore;
-  const s = st.settings || DEFAULT_SETTINGS;
-  const panel = document.getElementById('modal-settings-panel');
-  panel.innerHTML = `
-    <div class="modal-header"><div><div class="modal-title">设置</div><div class="modal-subtitle">配置 API 连接、角色信息与游戏参数</div></div><button class="modal-close" onclick="closeModal('modal-settings')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  const st=sillytavernStore;
+  const s=st.settings||DEFAULT_SETTINGS;
+  const panel=document.getElementById('modal-settings-panel');
+  panel.innerHTML=`
+    <div class="modal-header"><div><div class="modal-title">设置</div><div class="modal-subtitle">配置 API 连接与游戏参数</div></div><button class="modal-close" onclick="closeModal('modal-settings')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">API 基础 URL</label><input class="form-input" id="s-baseUrl" value="${escapeHtml(s.api.baseUrl)}" placeholder="https://api.openai.com/v1"></div>
-      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" id="s-apiKey" type="password" value="${escapeHtml(s.api.apiKey)}" placeholder="sk-..."></div>
-      <div class="form-group"><label class="form-label">模型</label><input class="form-input" id="s-model" value="${escapeHtml(s.api.model)}" placeholder="gpt-4o"><button class="modal-action-btn small" style="margin-top:6px;" onclick="fetchModelList()" id="btn-fetch-models"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> 获取模型列表</button></div>
+      <div class="form-group"><label class="form-label">API 基础 URL</label><input class="form-input" id="s-baseUrl" value="${escapeHtml(s.api.baseUrl)}"></div>
+      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" id="s-apiKey" type="password" value="${escapeHtml(s.api.apiKey)}"></div>
+      <div class="form-group"><label class="form-label">模型</label><input class="form-input" id="s-model" value="${escapeHtml(s.api.model)}"><button class="modal-action-btn small" style="margin-top:4px;" onclick="fetchModelList()">获取模型列表</button></div>
       <div id="s-model-list" style="margin-top:4px;"></div>
-      <div class="form-group"><button class="modal-action-btn" onclick="testApiConnection()" id="btn-test-conn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 测试连接</button><span id="s-conn-status" style="margin-left:10px;font-size:0.8rem;"></span></div>
-      <div class="form-group"><label class="form-label">你的称呼</label><input class="form-input" id="s-userName" value="${escapeHtml(s.userName)}" placeholder="用户"></div>
-      <div class="form-group"><label class="form-label">AI 角色名</label><input class="form-input" id="s-characterName" value="${escapeHtml(s.characterName)}" placeholder="苏晚晴"></div>
-      <div class="form-group"><label class="form-label">游戏模式输出格式 (format prompt)</label><textarea class="form-textarea" id="s-formatPrompt" rows="6">${escapeHtml(s.formatPromptTemplate || DEFAULT_FORMAT_PROMPT)}</textarea></div>
-      <div style="display:flex;gap:8px;margin-top:16px;">
-        <button class="modal-action-btn primary" onclick="saveSettingsFromModal()" id="btn-save-settings">保存设置</button>
-        <button class="modal-action-btn" onclick="openPresetModal()" id="btn-open-presets">管理预设</button>
+      <div class="form-group"><button class="modal-action-btn" onclick="testApiConnection()">测试连接</button><span id="s-conn-status" style="margin-left:8px;font-size:0.78rem;"></span></div>
+      <div class="form-group"><label class="form-label">你的角色名</label><input class="form-input" id="s-userName" value="${escapeHtml(s.userName)}"></div>
+      <div class="form-group"><label class="form-label">AI 角色名</label><input class="form-input" id="s-characterName" value="${escapeHtml(s.characterName)}"></div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="modal-action-btn primary" onclick="saveSettingsFromModal()">保存设置</button>
+        <button class="modal-action-btn" onclick="openPresetModal()">管理预设</button>
+        <button class="modal-action-btn" onclick="openLorebookModal()">世界书</button>
       </div>
     </div>`;
   document.getElementById('modal-settings').classList.add('open');
 }
-window.openSettingsModal = openSettingsModal;
+window.openSettingsModal=openSettingsModal;
 
 async function saveSettingsFromModal(){
-  const st = sillytavernStore;
-  const updates = {
-    api: {
-      baseUrl: document.getElementById('s-baseUrl').value.trim(),
-      apiKey: document.getElementById('s-apiKey').value.trim(),
-      model: document.getElementById('s-model').value.trim(),
-      timeout: 60000,
-      secondary: st.settings?.api?.secondary || { enabled:false, baseUrl:'', apiKey:'', model:'' },
-    },
-    userName: document.getElementById('s-userName').value.trim(),
-    characterName: document.getElementById('s-characterName').value.trim(),
-    formatPromptTemplate: document.getElementById('s-formatPrompt').value.trim(),
-  };
-  await st.updateSettings(updates);
+  const st=sillytavernStore;
+  await st.updateSettings({
+    api:{baseUrl:document.getElementById('s-baseUrl').value.trim(),apiKey:document.getElementById('s-apiKey').value.trim(),model:document.getElementById('s-model').value.trim(),timeout:60000,secondary:st.settings?.api?.secondary||{enabled:false,baseUrl:'',apiKey:'',model:''}},
+    userName:document.getElementById('s-userName').value.trim(),characterName:document.getElementById('s-characterName').value.trim(),
+  });
   await st.loadAll();
   closeModal('modal-settings');
   showToast('设置已保存','success');
-  refreshGameUI();
 }
-window.saveSettingsFromModal = saveSettingsFromModal;
+window.saveSettingsFromModal=saveSettingsFromModal;
 
 async function fetchModelList(){
-  const baseUrl = document.getElementById('s-baseUrl').value.trim();
-  const apiKey = document.getElementById('s-apiKey').value.trim();
-  const container = document.getElementById('s-model-list');
-  container.innerHTML = '<span style="font-size:0.78rem;color:var(--text-muted);">获取中...</span>';
+  const baseUrl=document.getElementById('s-baseUrl').value.trim();
+  const apiKey=document.getElementById('s-apiKey').value.trim();
+  const c=document.getElementById('s-model-list');
+  c.innerHTML='<span style="font-size:0.76rem;color:var(--text-muted);">获取中...</span>';
   try{
-    const result = await fetchModels({ baseUrl, apiKey });
-    container.innerHTML = `
-      <div style="font-size:0.73rem;color:var(--text-muted);margin-bottom:6px;">来源: ${result.source==='remote'?'远程':'本地推测'} ${result.error?`(${result.error})`:''}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px;">${result.models.map(m=>`<button class="modal-action-btn small" onclick="document.getElementById('s-model').value='${m}';" style="font-size:0.72rem;">${m}</button>`).join('')}</div>`;
-  }catch(e){
-    container.innerHTML = `<span class="status-badge err">获取失败</span>`;
-  }
+    const r=await fetchModels({baseUrl,apiKey});
+    c.innerHTML=`<div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:4px;">${r.source==='remote'?'远程':'推测'}${r.error?`(${r.error})`:''}</div><div style="display:flex;flex-wrap:wrap;gap:3px;">${r.models.map(m=>`<button class="modal-action-btn small" onclick="document.getElementById('s-model').value='${m}'">${m}</button>`).join('')}</div>`;
+  }catch(e){c.innerHTML='<span class="status-badge err">获取失败</span>';}
 }
-window.fetchModelList = fetchModelList;
+window.fetchModelList=fetchModelList;
 
 async function testApiConnection(){
-  const baseUrl = document.getElementById('s-baseUrl').value.trim();
-  const apiKey = document.getElementById('s-apiKey').value.trim();
-  const model = document.getElementById('s-model').value.trim();
-  const statusEl = document.getElementById('s-conn-status');
-  statusEl.innerHTML = '<span class="status-badge warn">测试中...</span>';
+  const baseUrl=document.getElementById('s-baseUrl').value.trim();
+  const apiKey=document.getElementById('s-apiKey').value.trim();
+  const model=document.getElementById('s-model').value.trim();
+  const el=document.getElementById('s-conn-status');el.innerHTML='<span class="status-badge warn">测试中...</span>';
   try{
-    const result = await testConnection({ baseUrl, apiKey, model });
-    statusEl.innerHTML = result.ok ? '<span class="status-badge ok">连接成功</span>' : `<span class="status-badge err">失败: ${result.error||result.errorBody||result.status}</span>`;
-  }catch(e){
-    statusEl.innerHTML = `<span class="status-badge err">错误: ${e.message}</span>`;
-  }
+    const r=await testConnection({baseUrl,apiKey,model});
+    el.innerHTML=r.ok?'<span class="status-badge ok">连接成功</span>':`<span class="status-badge err">${r.error||r.errorBody||r.status}</span>`;
+  }catch(e){el.innerHTML='<span class="status-badge err">错误</span>';}
 }
-window.testApiConnection = testApiConnection;
+window.testApiConnection=testApiConnection;
 
-// ==================== LOREBOOK MODAL ====================
+// ==================== LOREBOOK MODAL (simplified) ====================
 async function openLorebookModal(){
-  const st = sillytavernStore;
-  const books = st.lorebooks;
-  const activeIds = st.activeLorebookIds;
-  const panel = document.getElementById('modal-lorebook-panel');
-  panel.innerHTML = `
-    <div class="modal-header"><div><div class="modal-title">世界书管理</div><div class="modal-subtitle">管理场景背景、角色设定与世界观信息</div></div><button class="modal-close" onclick="closeModal('modal-lorebook')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  const st=sillytavernStore;
+  const books=st.lorebooks;
+  const activeIds=st.activeLorebookIds;
+  const panel=document.getElementById('modal-lorebook-panel');
+  panel.innerHTML=`
+    <div class="modal-header"><div><div class="modal-title">世界书管理</div><div class="modal-subtitle">管理场景背景与角色设定</div></div><button class="modal-close" onclick="closeModal('modal-lorebook')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchLorebookTab('list')" id="lorebook-tab-list">我的世界书</button>
-        <button class="tab-btn" onclick="switchLorebookTab('import')" id="lorebook-tab-import">导入</button>
-        <button class="tab-btn" onclick="switchLorebookTab('create')" id="lorebook-tab-create">创建</button>
-      </div>
-      <div class="tab-panel active" id="lorebook-panel-list">
-        ${books.length===0?`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><p>暂无世界书</p></div>`:
-        `<div class="checklist">${books.map(b=>`<label class="checklist-item"><input type="checkbox" ${activeIds.includes(b.id)?'checked':''} onchange="toggleLorebookActive('${b.id}')" id="lb-active-${b.id}"><span class="item-name">${escapeHtml(b.name)}</span><span class="item-meta">${b.entries.length} 条目</span><span style="flex:1;"></span><button class="modal-action-btn small danger" onclick="event.stopPropagation();handleDeleteLorebook('${b.id}')" style="font-size:0.7rem;">删除</button></label>`).join('')}</div>`}
-      </div>
-      <div class="tab-panel" id="lorebook-panel-import">
-        <div class="form-group"><label class="form-label">粘贴 SillyTavern JSON</label><textarea class="form-textarea" id="lb-import-json" rows="6" placeholder='{"name":"...","entries":{...}}'></textarea></div>
-        <button class="modal-action-btn primary" onclick="handleImportLorebook()" id="btn-import-lorebook">导入</button>
-      </div>
-      <div class="tab-panel" id="lorebook-panel-create">
-        <div class="form-group"><label class="form-label">世界书名称</label><input class="form-input" id="lb-create-name" placeholder="例如：校园日常设定"></div>
-        <div class="form-group"><label class="form-label">描述</label><input class="form-input" id="lb-create-desc" placeholder="简要描述此书包含的世界设定"></div>
-        <button class="modal-action-btn primary" onclick="handleCreateLorebook()" id="btn-create-lorebook">创建</button>
+      ${books.length===0?`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><p>暂无世界书</p></div>`:
+      `<div class="checklist">${books.map(b=>`<label class="checklist-item"><input type="checkbox" ${activeIds.includes(b.id)?'checked':''} onchange="toggleLorebookActive('${b.id}')"><span class="item-name">${escapeHtml(b.name)}</span><span class="item-meta">${b.entries.length} 条目</span><span style="flex:1;"></span><button class="modal-action-btn small danger" onclick="event.stopPropagation();deleteLorebookAndRefresh('${b.id}')">删除</button></label>`).join('')}</div>`}
+      <div style="margin-top:12px;display:flex;gap:6px;">
+        <button class="modal-action-btn" onclick="importLorebookJson()">导入 JSON</button>
+        <button class="modal-action-btn primary" onclick="createNewLorebook()">新建世界书</button>
       </div>
     </div>`;
   document.getElementById('modal-lorebook').classList.add('open');
 }
-window.openLorebookModal = openLorebookModal;
+window.openLorebookModal=openLorebookModal;
 
-function switchLorebookTab(tab){
-  document.querySelectorAll('#modal-lorebook .tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('#modal-lorebook .tab-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('lorebook-tab-'+tab).classList.add('active');
-  document.getElementById('lorebook-panel-'+tab).classList.add('active');
-}
-window.switchLorebookTab = switchLorebookTab;
+async function toggleLorebookActive(id){await sillytavernStore.toggleLorebook(id);await sillytavernStore.loadAll();}
+window.toggleLorebookActive=toggleLorebookActive;
 
-async function toggleLorebookActive(id){ await sillytavernStore.toggleLorebook(id); await sillytavernStore.loadAll(); }
-window.toggleLorebookActive = toggleLorebookActive;
+async function deleteLorebookAndRefresh(id){await sillytavernStore.deleteLorebook(id);await sillytavernStore.loadAll();openLorebookModal();}
+window.deleteLorebookAndRefresh=deleteLorebookAndRefresh;
 
-async function handleDeleteLorebook(id){
-  showConfirm('确定删除此世界书？',async()=>{
-    await sillytavernStore.deleteLorebook(id);
-    await sillytavernStore.loadAll();
-    closeModal('modal-lorebook');
-    openLorebookModal();
-    showToast('已删除','info');
-  });
-}
-window.handleDeleteLorebook = handleDeleteLorebook;
-
-async function handleImportLorebook(){
-  const json=document.getElementById('lb-import-json').value.trim();
-  if(!json){showToast('请粘贴 JSON 内容','warning');return;}
+async function importLorebookJson(){
+  const json=prompt('粘贴 SillyTavern JSON 内容：');
+  if(!json)return;
   try{
     const data=JSON.parse(json);
     const result=importLorebook(data);
-    const book = { ...result, id: crypto.randomUUID(), createdAt: Date.now(), updatedAt: Date.now() };
-    await sillytavernStore.saveLorebook(book);
-    await sillytavernStore.loadAll();
-    closeModal('modal-lorebook');
-    openLorebookModal();
-    showToast(`已导入世界书「${book.name}」`,'success');
+    const book={...result,id:crypto.randomUUID(),createdAt:Date.now(),updatedAt:Date.now()};
+    await sillytavernStore.saveLorebook(book);await sillytavernStore.loadAll();
+    openLorebookModal();showToast(`已导入「${book.name}」`,'success');
   }catch(e){showToast('导入失败: '+e.message,'warning');}
 }
-window.handleImportLorebook = handleImportLorebook;
+window.importLorebookJson=importLorebookJson;
 
-async function handleCreateLorebook(){
-  const name=document.getElementById('lb-create-name').value.trim();
-  const desc=document.getElementById('lb-create-desc').value.trim();
-  if(!name){showToast('请输入名称','warning');return;}
+async function createNewLorebook(){
+  const name=prompt('世界书名称：');
+  if(!name)return;
   const book=createDefaultLorebook(name);
-  book.description=desc||'';
-  book.entries=[createDefaultEntry()];
-  book.entries[0].content='在这里编写世界观设定...';
-  book.entries[0].keys=['故事背景','设定'];
-  await sillytavernStore.saveLorebook(book);
-  await sillytavernStore.loadAll();
-  closeModal('modal-lorebook');
-  openLorebookModal();
-  showToast(`已创建世界书「${name}」`,'success');
+  book.entries=[{...createDefaultEntry(),content:'在这里编写世界观设定...',keys:['故事背景','设定']}];
+  await sillytavernStore.saveLorebook(book);await sillytavernStore.loadAll();
+  openLorebookModal();showToast(`已创建「${name}」`,'success');
 }
-window.handleCreateLorebook = handleCreateLorebook;
+window.createNewLorebook=createNewLorebook;
 
-// ==================== PRESET MODAL ====================
+// ==================== PRESET MODAL (simplified) ====================
 async function openPresetModal(){
-  const st = sillytavernStore;
-  const presets = st.presets;
-  const panel = document.getElementById('modal-preset-panel');
-  panel.innerHTML = `
-    <div class="modal-header"><div><div class="modal-title">预设管理</div><div class="modal-subtitle">点击预设名称编辑参数与提示词，绿色标签为当前激活</div></div><button class="modal-close" onclick="closeModal('modal-preset')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+  const st=sillytavernStore;
+  const panel=document.getElementById('modal-preset-panel');
+  panel.innerHTML=`
+    <div class="modal-header"><div><div class="modal-title">预设管理</div></div><button class="modal-close" onclick="closeModal('modal-preset')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
-      <div class="item-list">${presets.map(p=>`
-        <div class="item-row" style="cursor:pointer;">
-          <span class="item-name" onclick="openPresetEditor('${p.id}')" style="cursor:pointer;flex:1;padding:4px 0;" title="点击编辑此预设">${escapeHtml(p.name)}</span>
-          <span class="item-meta">${escapeHtml(p.settings.openai_model||'跟随设置')}</span>
-          ${st.settings?.activePresetId===p.id?`<span class="status-badge ok" style="margin:0 6px;">当前</span>`:''}
-          <div class="item-actions">
-            <button class="modal-action-btn small" onclick="event.stopPropagation();handleSelectPreset('${p.id}')">选用</button>
-            <button class="modal-action-btn small" onclick="event.stopPropagation();openPresetEditor('${p.id}')">编辑</button>
-            <button class="modal-action-btn small danger" onclick="event.stopPropagation();handleDeletePreset('${p.id}')">删除</button>
-          </div>
-        </div>`).join('')}</div>
-      <button class="modal-action-btn primary" style="margin-top:12px;width:100%;justify-content:center;" onclick="handleCreatePreset()" id="btn-create-preset">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新建预设
-      </button>
+      <div class="item-list">${st.presets.map(p=>`<div class="item-row"><span class="item-name" onclick="editPresetQuick('${p.id}')">${escapeHtml(p.name)}</span><span class="item-meta">${escapeHtml(p.settings.openai_model||'跟随设置')}</span>${st.settings?.activePresetId===p.id?'<span class="status-badge ok">当前</span>':''}<div class="item-actions"><button class="modal-action-btn small" onclick="selectPresetAndClose('${p.id}')">选用</button><button class="modal-action-btn small danger" onclick="deletePresetAndRefresh('${p.id}')">删除</button></div></div>`).join('')}</div>
+      <button class="modal-action-btn primary" style="margin-top:10px;width:100%;justify-content:center;" onclick="createPresetQuick()">新建预设</button>
     </div>`;
   document.getElementById('modal-preset').classList.add('open');
 }
-window.openPresetModal = openPresetModal;
+window.openPresetModal=openPresetModal;
 
-function openPresetEditor(presetId){
-  const st = sillytavernStore;
-  const p = st.presets.find(pr=>pr.id===presetId);
-  if(!p) return;
-  const s = p.settings;
-  const panel = document.getElementById('modal-preset-panel');
-  panel.innerHTML = `
-    <div class="modal-header"><div><div class="modal-title">编辑预设：${escapeHtml(p.name)}</div><div class="modal-subtitle">${escapeHtml(p.description||'')}</div></div><button class="modal-close" onclick="closeModal('modal-preset')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+async function selectPresetAndClose(id){await sillytavernStore.updateSettings({activePresetId:id});await sillytavernStore.loadAll();closeModal('modal-preset');showToast('已切换预设','success');}
+window.selectPresetAndClose=selectPresetAndClose;
+
+async function deletePresetAndRefresh(id){
+  const st=sillytavernStore;
+  if(st.presets.length<=1){showToast('至少保留一个预设','warning');return;}
+  showConfirm('删除此预设？',async()=>{await st.deletePreset(id);await st.loadAll();openPresetModal();showToast('已删除','info');});
+}
+window.deletePresetAndRefresh=deletePresetAndRefresh;
+
+async function createPresetQuick(){
+  const preset=createDefaultPreset();
+  const np={...preset,id:crypto.randomUUID(),createdAt:Date.now(),updatedAt:Date.now()};
+  await sillytavernStore.savePreset(np);await sillytavernStore.loadAll();
+  openPresetModal();showToast('已创建','success');
+}
+window.createPresetQuick=createPresetQuick;
+
+function editPresetQuick(id){
+  const st=sillytavernStore;const p=st.presets.find(pr=>pr.id===id);if(!p)return;
+  const s=p.settings;
+  const panel=document.getElementById('modal-preset-panel');
+  panel.innerHTML=`
+    <div class="modal-header"><div><div class="modal-title">编辑：${escapeHtml(p.name)}</div></div><button class="modal-close" onclick="closeModal('modal-preset')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchPresetEditorTab('params')" id="pe-tab-params">采样参数</button>
-        <button class="tab-btn" onclick="switchPresetEditorTab('prompts')" id="pe-tab-prompts">提示词</button>
-        <button class="tab-btn" onclick="switchPresetEditorTab('order')" id="pe-tab-order">Prompt 排序</button>
+      <div class="form-group"><label class="form-label">名称</label><input class="form-input" id="pe-name" value="${escapeHtml(p.name)}"></div>
+      <div class="form-group"><label class="form-label">模型 (留空=用设置)</label><input class="form-input" id="pe-model" value="${escapeHtml(s.openai_model||'')}"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group"><label class="form-label">Temperature</label><input class="form-input" id="pe-temp" type="number" step="0.01" min="0" max="2" value="${s.temp_openai??0.9}"></div>
+        <div class="form-group"><label class="form-label">Top P</label><input class="form-input" id="pe-topp" type="number" step="0.01" min="0" max="1" value="${s.top_p_openai??0.95}"></div>
+        <div class="form-group"><label class="form-label">Max Tokens</label><input class="form-input" id="pe-maxtok" type="number" min="1" value="${s.openai_max_tokens??2048}"></div>
+        <div class="form-group"><label class="form-label">Max Context</label><input class="form-input" id="pe-maxctx" type="number" min="1" value="${s.openai_max_context??4096}"></div>
       </div>
-      <div class="tab-panel active" id="pe-panel-params">
-        <div class="form-group"><label class="form-label">预设名称</label><input class="form-input" id="pe-name" value="${escapeHtml(p.name)}" placeholder="预设名称"></div>
-        <div class="form-group"><label class="form-label">描述</label><input class="form-input" id="pe-desc" value="${escapeHtml(p.description||'')}" placeholder="可选描述"></div>
-        <div class="form-group"><label class="form-label">模型 (留空则使用设置中的模型)</label><input class="form-input" id="pe-model" value="${escapeHtml(s.openai_model||'')}" placeholder="例如 deepseek-v4-pro"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="form-group"><label class="form-label">Temperature</label><input class="form-input" id="pe-temp" type="number" step="0.01" min="0" max="2" value="${s.temp_openai??0.8}"></div>
-          <div class="form-group"><label class="form-label">Top P</label><input class="form-input" id="pe-topp" type="number" step="0.01" min="0" max="1" value="${s.top_p_openai??0.9}"></div>
-          <div class="form-group"><label class="form-label">Max Tokens</label><input class="form-input" id="pe-maxtok" type="number" min="1" max="32768" value="${s.openai_max_tokens??2048}"></div>
-          <div class="form-group"><label class="form-label">Max Context</label><input class="form-input" id="pe-maxctx" type="number" min="1" max="131072" value="${s.openai_max_context??4096}"></div>
-          <div class="form-group"><label class="form-label">Frequency Penalty</label><input class="form-input" id="pe-freq" type="number" step="0.01" min="-2" max="2" value="${s.freq_pen_openai??0}"></div>
-          <div class="form-group"><label class="form-label">Presence Penalty</label><input class="form-input" id="pe-pres" type="number" step="0.01" min="-2" max="2" value="${s.pres_pen_openai??0}"></div>
-        </div>
-        <div class="form-group"><label class="form-label"><input type="checkbox" id="pe-stream" ${s.stream_openai?'checked':''} style="margin-right:6px;">启用流式传输 (stream)</label></div>
-      </div>
-      <div class="tab-panel" id="pe-panel-prompts">
-        <div class="form-group"><label class="form-label">Main Prompt ({{char}} = 角色名, {{user}} = 用户名)</label><textarea class="form-textarea" id="pe-main" rows="4">${escapeHtml(s.main||'')}</textarea></div>
-        <div class="form-group"><label class="form-label">Jailbreak Prompt</label><textarea class="form-textarea" id="pe-jailbreak" rows="4">${escapeHtml(s.jailbreak||'')}</textarea></div>
-        <div class="form-group"><label class="form-label">NSFW Prompt</label><textarea class="form-textarea" id="pe-nsfw" rows="3">${escapeHtml(s.nsfw||'')}</textarea></div>
-        <div class="form-group"><label class="form-label">New Chat Prompt</label><textarea class="form-textarea" id="pe-newchat" rows="3">${escapeHtml(s.new_chat_prompt||'')}</textarea></div>
-      </div>
-      <div class="tab-panel" id="pe-panel-order">
-        <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:8px;">拖拽排序 Prompt 块的注入顺序 (拖动后点保存生效)</div>
-        <div id="pe-order-list" style="display:flex;flex-direction:column;gap:4px;"></div>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:20px;">
-        <button class="modal-action-btn" onclick="openPresetModal()" id="btn-preset-back">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> 返回列表
-        </button>
-        <button class="modal-action-btn primary" onclick="savePresetEditor('${p.id}')" id="btn-preset-save" data-preset-id="${p.id}">保存预设</button>
+      <div class="form-group"><label class="form-label">Main Prompt</label><textarea class="form-textarea" id="pe-main" rows="3">${escapeHtml(s.main||'')}</textarea></div>
+      <div style="display:flex;gap:6px;margin-top:12px;">
+        <button class="modal-action-btn" onclick="openPresetModal()">返回</button>
+        <button class="modal-action-btn primary" onclick="savePresetEdit('${p.id}')">保存</button>
       </div>
     </div>`;
-  // Build prompt order list
-  buildPromptOrderList(p);
 }
-window.openPresetEditor = openPresetEditor;
+window.editPresetQuick=editPresetQuick;
 
-function buildPromptOrderList(p){
-  const container = document.getElementById('pe-order-list');
-  const order = p.settings.prompt_order || [];
-  if(!container) return;
-  if(order.length===0){
-    container.innerHTML = '<div style="font-size:0.78rem;color:var(--text-muted);padding:8px;">暂无 Prompt 排序定义</div>';
-    return;
-  }
-  container.innerHTML = order.map((item,i)=>`
-    <div class="item-row" draggable="true" style="cursor:grab;" id="po-${i}">
-      <span style="font-size:0.82rem;">${escapeHtml(item.identifier)}</span>
-      <span style="font-size:0.72rem;color:var(--text-muted);">${escapeHtml(item.name||item.identifier)}</span>
-      <span class="status-badge ${item.enabled!==false?'ok':'err'}">${item.enabled!==false?'启用':'禁用'}</span>
-      <div class="item-actions">
-        <button class="modal-action-btn small" onclick="togglePromptOrderItem(${i})">${item.enabled!==false?'禁用':'启用'}</button>
-        ${i>0?`<button class="modal-action-btn small" onclick="movePromptOrderItem(${i},-1)">↑</button>`:''}
-        ${i<order.length-1?`<button class="modal-action-btn small" onclick="movePromptOrderItem(${i},1)">↓</button>`:''}
-      </div>
-    </div>`).join('');
+async function savePresetEdit(id){
+  const st=sillytavernStore;const p=st.presets.find(pr=>pr.id===id);if(!p)return;
+  p.name=document.getElementById('pe-name')?.value?.trim()||p.name;
+  p.settings={...p.settings,openai_model:document.getElementById('pe-model')?.value?.trim()||'',temp_openai:parseFloat(document.getElementById('pe-temp')?.value)??0.9,top_p_openai:parseFloat(document.getElementById('pe-topp')?.value)??0.95,openai_max_tokens:parseInt(document.getElementById('pe-maxtok')?.value)||2048,openai_max_context:parseInt(document.getElementById('pe-maxctx')?.value)||4096,main:document.getElementById('pe-main')?.value||''};
+  p.updatedAt=Date.now();
+  await st.savePreset(p);await st.loadAll();
+  closeModal('modal-preset');openPresetModal();showToast('已保存','success');
 }
-window.buildPromptOrderList = buildPromptOrderList;
-
-window._poEditedPresetId = null;
-
-function switchPresetEditorTab(tab){
-  document.querySelectorAll('#modal-preset .tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('#modal-preset .tab-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('pe-tab-'+tab)?.classList.add('active');
-  document.getElementById('pe-panel-'+tab)?.classList.add('active');
-}
-window.switchPresetEditorTab = switchPresetEditorTab;
-
-function togglePromptOrderItem(idx){
-  const st = sillytavernStore;
-  const pid = document.getElementById('btn-preset-save')?.getAttribute('data-preset-id');
-  const p = pid ? st.presets.find(pr=>pr.id===pid) : null;
-  if(!p) return;
-  const order = [...(p.settings.prompt_order||[])];
-  if(order[idx]) order[idx] = {...order[idx], enabled: !(order[idx].enabled!==false)};
-  p.settings.prompt_order = order;
-  buildPromptOrderList(p);
-}
-window.togglePromptOrderItem = togglePromptOrderItem;
-
-function movePromptOrderItem(idx, dir){
-  const st = sillytavernStore;
-  const saveBtn = document.getElementById('btn-preset-save');
-  const pid = saveBtn?.getAttribute('data-preset-id');
-  const p = pid ? st.presets.find(pr=>pr.id===pid) : null;
-  if(!p) return;
-  const order = [...(p.settings.prompt_order||[])];
-  const newIdx = idx + dir;
-  if(newIdx<0||newIdx>=order.length) return;
-  [order[idx], order[newIdx]] = [order[newIdx], order[idx]];
-  p.settings.prompt_order = order;
-  buildPromptOrderList(p);
-}
-window.movePromptOrderItem = movePromptOrderItem;
-
-async function savePresetEditor(presetId){
-  const st = sillytavernStore;
-  const p = st.presets.find(pr=>pr.id===presetId);
-  if(!p) return;
-  p.name = document.getElementById('pe-name')?.value?.trim() || p.name;
-  p.description = document.getElementById('pe-desc')?.value?.trim() || '';
-  p.settings = {
-    ...p.settings,
-    openai_model: document.getElementById('pe-model')?.value?.trim() || '',
-    temp_openai: parseFloat(document.getElementById('pe-temp')?.value) ?? 0.8,
-    top_p_openai: parseFloat(document.getElementById('pe-topp')?.value) ?? 0.9,
-    openai_max_tokens: parseInt(document.getElementById('pe-maxtok')?.value) || 2048,
-    openai_max_context: parseInt(document.getElementById('pe-maxctx')?.value) || 4096,
-    freq_pen_openai: parseFloat(document.getElementById('pe-freq')?.value) ?? 0,
-    pres_pen_openai: parseFloat(document.getElementById('pe-pres')?.value) ?? 0,
-    stream_openai: document.getElementById('pe-stream')?.checked || false,
-    main: document.getElementById('pe-main')?.value || '',
-    jailbreak: document.getElementById('pe-jailbreak')?.value || '',
-    nsfw: document.getElementById('pe-nsfw')?.value || '',
-    new_chat_prompt: document.getElementById('pe-newchat')?.value || '',
-  };
-  p.updatedAt = Date.now();
-  await st.savePreset(p);
-  await st.loadAll();
-  closeModal('modal-preset');
-  openPresetModal();
-  showToast(`预设「${p.name}」已保存`,'success');
-}
-window.savePresetEditor = savePresetEditor;
-
-async function handleSelectPreset(id){
-  await sillytavernStore.updateSettings({ activePresetId: id });
-  await sillytavernStore.loadAll();
-  closeModal('modal-preset');
-  showToast('已切换预设','success');
-}
-window.handleSelectPreset = handleSelectPreset;
-
-async function handleDeletePreset(id){
-  const st = sillytavernStore;
-  if(st.presets.length<=1){showToast('至少保留一个预设','warning');return;}
-  showConfirm('确定删除此预设？',async()=>{
-    await st.deletePreset(id);
-    await st.loadAll();
-    closeModal('modal-preset');
-    openPresetModal();
-    showToast('预设已删除','info');
-  });
-}
-window.handleDeletePreset = handleDeletePreset;
-
-async function handleCreatePreset(){
-  const preset = createDefaultPreset();
-  const np = { ...preset, id: crypto.randomUUID(), createdAt: Date.now(), updatedAt: Date.now() };
-  await sillytavernStore.savePreset(np);
-  await sillytavernStore.loadAll();
-  closeModal('modal-preset');
-  openPresetModal();
-  showToast('已创建新预设','success');
-}
-window.handleCreatePreset = handleCreatePreset;
+window.savePresetEdit=savePresetEdit;
 
 // ==================== MODAL UTILS ====================
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-window.closeModal = closeModal;
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+window.closeModal=closeModal;
 
 // ==================== TOASTS ====================
-function showToast(message, type='info'){
-  const container = document.getElementById('toast-container');
-  const id = 'toast-'+Date.now();
-  const iconMap = {
-    success: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
-    info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
-    warning: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
-  };
-  const toast = document.createElement('div');
-  toast.className = 'toast'; toast.id = id;
-  toast.innerHTML = `<div class="toast-icon ${type}">${iconMap[type]}</div><div class="toast-message">${message}</div><button class="toast-close" onclick="document.getElementById('${id}').classList.remove('visible');setTimeout(()=>document.getElementById('${id}')?.remove(),400)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+function showToast(message,type='info'){
+  const container=document.getElementById('toast-container');
+  const id='toast-'+Date.now();
+  const icons={success:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',info:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',warning:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'};
+  const toast=document.createElement('div');toast.className='toast';toast.id=id;
+  toast.innerHTML=`<div class="toast-icon ${type}">${icons[type]}</div><div class="toast-message">${message}</div><button class="toast-close" onclick="document.getElementById('${id}').classList.remove('visible');setTimeout(()=>document.getElementById('${id}')?.remove(),400)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
   container.appendChild(toast);
   requestAnimationFrame(()=>toast.classList.add('visible'));
-  setTimeout(()=>{ toast.classList.remove('visible'); setTimeout(()=>toast.remove(),400); },3500);
+  setTimeout(()=>{toast.classList.remove('visible');setTimeout(()=>toast.remove(),400);},3500);
 }
-window.showToast = showToast;
+window.showToast=showToast;
 
-// ==================== CONFIRM ====================
-let confirmCallback = null;
-function showConfirm(message, callback){
-  document.getElementById('confirm-message').textContent = message;
-  document.getElementById('confirm-action').onclick = ()=>{ hideConfirm(); if(callback) callback(); };
+function showConfirm(message,callback){
+  document.getElementById('confirm-message').textContent=message;
+  document.getElementById('confirm-action').onclick=()=>{hideConfirm();if(callback)callback();};
   document.getElementById('confirm-dialog').classList.add('open');
 }
-function hideConfirm(){ document.getElementById('confirm-dialog').classList.remove('open'); }
-window.hideConfirm = hideConfirm;
-window.showConfirm = showConfirm;
+function hideConfirm(){document.getElementById('confirm-dialog').classList.remove('open');}
+window.hideConfirm=hideConfirm;window.showConfirm=showConfirm;
 
 // ==================== INIT ====================
 async function initApp(){
-  try {
+  try{
     await initializeDatabase();
     await sillytavernStore.loadAll();
-    storeReady = true;
+    storeReady=true;
 
-    // Set game defaults on first run
     if(!sillytavernStore.settings){
-      const gameSettings = {
-        ...DEFAULT_SETTINGS,
-        userName: '林澈',
-        characterName: '苏晚晴',
-        uiMode: 'game',
-      };
+      const gameSettings={...DEFAULT_SETTINGS,userName:'林澈',characterName:'苏晚晴',uiMode:'game'};
       await saveSettings(gameSettings);
       await sillytavernStore.loadAll();
     }
-
-    // Ensure character names are correct
-    const st = sillytavernStore;
-    if(st.settings && (st.settings.characterName === 'AI' || st.settings.userName === '用户')){
-      await st.updateSettings({ userName: '林澈', characterName: '苏晚晴' });
+    const st=sillytavernStore;
+    if(st.settings&&(st.settings.characterName==='AI'||st.settings.userName==='用户')){
+      await st.updateSettings({userName:'林澈',characterName:'苏晚晴'});
       await st.loadAll();
     }
 
-    // Create default lorebook with world context if none exist
-    if(st.lorebooks.length === 0){
-      const worldBook = createDefaultLorebook('心之回响·世界观');
-      worldBook.description = '游戏核心世界观与场景设定';
-      worldBook.entries = [
-        {
-          ...createDefaultEntry(),
-          id: crypto.randomUUID(),
-          keys: ['学校','校园','教室','班级','二年A班','转校生','樱花'],
-          content: '这是春日的樱华学园，樱花正值盛开季节。二年A班的教室里阳光明媚，新的学期刚刚开始。林澈是转校生，苏晚晴是班长。他们坐在相邻的座位上。',
-          order: 10,
-        },
-        {
-          ...createDefaultEntry(),
-          id: crypto.randomUUID(),
-          keys: ['天台','屋顶','高处','风','天空'],
-          content: '学校的天台是整栋建筑视野最好的地方。午后的风轻轻吹过，可以俯瞰整个校园和远处的城市轮廓。这里常是学生独自思考或偶然相遇的地点。',
-          order: 20,
-        },
-        {
-          ...createDefaultEntry(),
-          id: crypto.randomUUID(),
-          keys: ['公园','散步','长椅','樱花树','喷泉','黄昏','夕阳'],
-          content: '学校附近的公园里有一条樱花林荫道。傍晚时分夕阳很美，喷泉的水声清脆。这里的长椅是情侣们的热门约会地，也是独自思考和偶遇的好地方。',
-          order: 30,
-        },
-        {
-          ...createDefaultEntry(),
-          id: crypto.randomUUID(),
-          keys: ['奶茶店','放学后','饮料','约会','甜点'],
-          content: '学校附近的奶茶店叫"甜韵茶语"，暖黄色灯光，角落的卡座很受欢迎。这里的季节限定口味总是很受欢迎。放学后经常有学生在这里聊天写作业。',
-          order: 40,
-        },
-        {
-          ...createDefaultEntry(),
-          id: crypto.randomUUID(),
-          keys: ['林澈','转校生','摄影','内敛','安静'],
-          content: '林澈是刚从其他城市转来的转校生。他性格内敛沉静，不太善于与陌生人交谈，但善于观察身边的事物。爱好摄影，常用相机记录生活中的美好瞬间。',
-          order: 50,
-        },
-        {
-          ...createDefaultEntry(),
-          id: crypto.randomUUID(),
-          keys: ['苏晚晴','班长','温柔','樱花','奶茶','责任心'],
-          content: '苏晚晴是二年A班的班长。她温柔而坚韧，总是把班级事务处理得井井有条。她特别喜欢樱花和奶茶，放学后常常去奶茶店坐一会儿。她偶尔会为一些小事固执己见。',
-          order: 60,
-        },
+    // Auto-create world lorebook
+    if(st.lorebooks.length===0){
+      const worldBook=createDefaultLorebook('心之回响·世界观');
+      worldBook.description='游戏世界观与场景设定';
+      worldBook.entries=[
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['学校','校园','教室','二年A班','转校生','樱花'],content:'樱华学园，樱花正盛。二年A班，林澈是转校生，苏晚晴是班长。他们坐在相邻的座位上。',order:10},
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['天台','屋顶','风','天空','俯瞰'],content:'学校天台视野开阔，午后的风轻轻吹过。这里是独自思考和偶然相遇的好地方。',order:20},
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['公园','樱花树','长椅','喷泉','黄昏','夕阳'],content:'学校附近的公园，樱花林荫道。黄昏时夕阳很美，喷泉声清脆。情侣们的热门约会地。',order:30},
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['奶茶店','放学后','饮料','甜点','约会'],content:'校旁奶茶店"甜韵茶语"，暖黄灯光，角落卡座最受欢迎。放学后人流聚集地。',order:40},
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['林澈','转校生','摄影','内敛'],content:'林澈是新来的转校生，性格内敛沉静，善于观察。爱好摄影。',order:50},
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['苏晚晴','班长','温柔','樱花','奶茶'],content:'苏晚晴是二年A班班长，温柔坚韧，喜欢樱花和奶茶，偶尔固执。',order:60},
       ];
-      await saveLorebook(worldBook);
-      await st.loadAll();
-      // Auto-activate the world lorebook
-      const freshBooks = await getLorebooks();
-      if(freshBooks.length > 0){
-        await st.updateSettings({ activeLorebookIds: [freshBooks[0].id] });
-        await st.loadAll();
-      }
+      await saveLorebook(worldBook);await st.loadAll();
+      const freshBooks=await getLorebooks();
+      if(freshBooks.length>0){await st.updateSettings({activeLorebookIds:[freshBooks[0].id]});await st.loadAll();}
     }
 
-    renderStory();
-    renderCharacters();
-    refreshGameUI();
-    updateTimeDisplay();
-
-    document.querySelectorAll('.modal-overlay').forEach(o=>{ o.addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); }); });
-    document.getElementById('confirm-dialog').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
-    document.addEventListener('keydown',function(e){ if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open, .confirm-overlay.open').forEach(m=>m.classList.remove('open')); });
-    document.querySelectorAll('.nav-link').forEach(l=>{ l.addEventListener('click',function(){ navigateTo(this.dataset.page); }); });
-  } catch(e) {
-    document.body.insertAdjacentHTML('beforeend',
-      `<div style="position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(255,80,80,0.2);border:1px solid rgba(255,80,80,0.4);border-radius:12px;padding:16px 24px;max-width:500px;text-align:center;font-size:0.85rem;color:#ffb0b0;">系统初始化失败：${e.message}<br><span style="font-size:0.75rem;color:#ff8080;">请打开浏览器控制台 (F12) 查看详细错误</span></div>`);
-    console.error('App init error:', e);
+    renderHome();renderDiary();renderCharacters();
+    document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')}));
+    document.getElementById('confirm-dialog').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open,.confirm-overlay.open').forEach(m=>m.classList.remove('open'))});
+    document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',function(){navigateTo(this.dataset.page)}));
+  }catch(e){
+    document.body.insertAdjacentHTML('beforeend',`<div style="position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(255,80,80,0.2);border:1px solid rgba(255,80,80,0.4);border-radius:10px;padding:14px 22px;max-width:480px;text-align:center;font-size:0.83rem;color:#ffb0b0;">初始化失败：${e.message}<br><span style="font-size:0.72rem;">请打开控制台 (F12) 查看详情</span></div>`);
+    console.error('App init error:',e);
   }
 }
 
-function updateTimeDisplay(){
-  const h = new Date().getHours();
-  let label = '午前';
-  if(h>=12&&h<17) label='午后';
-  else if(h>=17&&h<20) label='黄昏';
-  else if(h>=20||h<5) label='夜间';
-  document.getElementById('time-display').textContent = `第 1 天 · ${label}`;
-}
-
-try {
-  initApp();
-  initParticles();
-} catch(e) {
-  console.error('Module init error:', e);
-}
+initApp();
+initParticles();
 </script>
 </body>
 </html>
