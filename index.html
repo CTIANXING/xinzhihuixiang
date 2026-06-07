@@ -255,16 +255,28 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="home-right">
           <div class="home-action-card primary" onclick="startDayFlow()" id="home-action-start">
             <h3 id="home-action-title">开始新的一天</h3>
-            <p id="home-action-desc">前往地图选择今日要去的地点</p>
+            <p id="home-action-desc">前往地图选择今天要去的地方</p>
+          </div>
+          <div class="home-action-card" onclick="saveToSlot(0);showToast('已保存到自动存档','success')" id="home-action-save">
+            <h3>快速存档</h3>
+            <p>保存当前进度到自动存档位</p>
+          </div>
+          <div class="home-action-card" onclick="openSaveLoadModal()" id="home-action-load">
+            <h3>读取存档</h3>
+            <p>浏览、读取或管理所有存档位</p>
           </div>
           <div class="home-action-card" onclick="navigateTo('diary')" id="home-action-diary">
             <h3>日记</h3>
             <p>回顾每一天的故事摘要</p>
           </div>
-          <div class="home-action-card" onclick="openLorebookModal()" id="home-action-lorebook">
-            <h3>世界书</h3>
-            <p>管理世界观设定与角色背景</p>
-          </div>
+          <div class="home-action-card" onclick="togglePlayerRole()" id="home-action-role">
+            <h3 id="home-role-title">当前扮演：林澈</h3>
+             <p id="home-role-desc">点击切换扮演角色</p>
+           </div>
+           <div class="home-action-card" onclick="openLorebookModal()" id="home-action-lorebook">
+             <h3>世界书</h3>
+             <p>管理世界观设定与角色背景</p>
+           </div>
         </div>
       </div>
     </section>
@@ -298,7 +310,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="game-main">
           <div class="game-scene-header">
             <div class="game-scene-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="game-scene-label">未开始</span></div>
-            <div class="game-day-info"><span id="game-day-label">第1天·4月</span><span class="game-msg-counter" id="game-msg-counter">0/20</span><button class="game-send-btn end" onclick="skipToday()" id="btn-skip-today" style="font-size:0.7rem;padding:5px 10px;margin-left:8px;" title="跳过今天直接结算">跳过</button><button class="game-send-btn end" onclick="endCurrentDay()" id="btn-end-today" style="font-size:0.7rem;padding:5px 10px;">结束今天</button></div>
+            <div class="game-day-info"><span id="game-day-label">第1天·4月</span><span class="game-msg-counter" id="game-msg-counter">0/20</span><button class="game-send-btn end" onclick="skipToday()" id="btn-skip-today" style="font-size:0.7rem;padding:5px 10px;margin-left:4px;">跳过</button><button class="game-send-btn end" onclick="endCurrentDay()" id="btn-end-today" style="font-size:0.7rem;padding:5px 10px;">结束</button><button class="game-send-btn" onclick="saveToSlot(0)" id="btn-save-game" style="font-size:0.7rem;padding:5px 10px;background:rgba(255,255,255,0.1);">存档</button></div>
           </div>
           <div class="game-text-area" id="game-text-area">
             <div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p id="game-empty-msg">请先在主页选择今日地点并开始新的一天</p></div>
@@ -334,6 +346,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div class="modal-overlay" id="modal-preset"><div class="modal-panel" id="modal-preset-panel"></div></div>
 <div class="modal-overlay" id="modal-location"><div class="modal-panel" id="modal-location-panel"></div></div>
 <div class="modal-overlay" id="modal-backup"><div class="modal-panel" id="modal-backup-panel"></div></div>
+<div class="modal-overlay" id="modal-saveload"><div class="modal-panel wide" id="modal-saveload-panel"></div></div>
 <div class="confirm-overlay" id="confirm-dialog"><div class="confirm-panel"><div class="confirm-message" id="confirm-message"></div><div class="confirm-buttons"><button class="confirm-btn cancel" onclick="hideConfirm()">取消</button><button class="confirm-btn confirm-action" id="confirm-action">确认</button></div></div></div>
 <div class="toast-container" id="toast-container"></div>
 
@@ -473,6 +486,139 @@ let storeReady = false;
 let previousAffection = 10; // for detecting milestone crossings
 let affectionGainedToday = 0;
 let dailyAffectionCap = DEFAULT_DAILY_AFFECTION_CAP;
+let playerRole = 'male'; // 'male'=扮演林澈, 'female'=扮演苏晚晴
+
+function getCharName(){return playerRole==='female'?'林澈':'苏晚晴';}
+function getUserName(){return playerRole==='female'?'苏晚晴':'林澈';}
+
+function togglePlayerRole(){
+  playerRole=playerRole==='male'?'female':'male';
+  document.getElementById('home-role-title').textContent=`当前扮演：${getUserName()}`;
+  document.getElementById('home-role-desc').textContent=`对方角色为${getCharName()}`;
+  showToast(`已切换为扮演「${getUserName()}」`,'success');
+  // Update game labels
+  const gameLabels=document.querySelectorAll('.game-msg.user .msg-role');
+  gameLabels.forEach(el=>{el.textContent=getUserName();});
+}
+window.togglePlayerRole=togglePlayerRole;
+
+// ==================== SAVE SYSTEM ====================
+const MAX_SAVE_SLOTS=10;
+
+async function makeStateSnapshot(){
+  const data=await exportAllData();
+  data.gameState={currentDay,todayLocation:todayLocation?.id||null,dayStarted,messagesToday,currentRound,affection:gameCharacters[1].affection,previousAffection,affectionGainedToday,diaryEntries,dailyAffectionCap,playerRole,exportedAt:Date.now()};
+  return data;
+}
+
+async function saveToSlot(slotIndex){
+  try{
+    const snap=await makeStateSnapshot();
+    const loc=Locations.find(l=>l.id===snap.gameState.todayLocation);
+    const slot={
+      index:slotIndex,
+      name:slotIndex===0?'自动存档':`存档 ${slotIndex}`,
+      timestamp:Date.now(),
+      day:currentDay,
+      month:getMonth(),
+      location:loc?.name||'',
+      affection:gameCharacters[1].affection,
+      playerRole,
+      summary:diaryEntries.length>0?diaryEntries[diaryEntries.length-1].summary:'新游戏',
+      data:snap,
+    };
+    const st=sillytavernStore;
+    const allSlots=st.settings?.saveSlots?JSON.parse(st.settings.saveSlots):[];
+    allSlots[slotIndex]=slot;
+    st.settings.saveSlots=JSON.stringify(allSlots.filter(Boolean));
+    await saveSettings(st.settings);
+    await st.loadAll();
+    showToast(`已保存到${slot.name}`,'success');
+  }catch(e){showToast('保存失败: '+e.message,'warning');}
+}
+window.saveToSlot=saveToSlot;
+
+async function loadFromSlot(slotIndex){
+  const st=sillytavernStore;
+  const allSlots=st.settings?.saveSlots?JSON.parse(st.settings.saveSlots):[];
+  const slot=allSlots[slotIndex];
+  if(!slot||!slot.data){showToast('存档为空','warning');return;}
+  showConfirm('读取存档将覆盖当前进度，确定？',async()=>{
+    try{
+      await importAllData(slot.data);
+      const gs=slot.data.gameState;
+      if(gs){
+        currentDay=gs.currentDay||1;dayStarted=false;messagesToday=0;currentRound=0;roundHistory=[];
+        gameCharacters[1].affection=gs.affection||10;previousAffection=gs.previousAffection||10;
+        affectionGainedToday=0;diaryEntries=gs.diaryEntries||[];
+        dailyAffectionCap=gs.dailyAffectionCap||DEFAULT_DAILY_AFFECTION_CAP;
+        playerRole=gs.playerRole||'male';
+        todayLocation=gs.todayLocation?Locations.find(l=>l.id===gs.todayLocation)||null:null;
+      }
+      await sillytavernStore.loadAll();
+      saveGameState();
+      closeModal('modal-saveload');
+      renderHome();renderDiary();renderCharacters();
+      document.getElementById('home-role-title').textContent=`当前扮演：${getUserName()}`;
+      document.getElementById('home-role-desc').textContent=`对方角色为${getCharName()}`;
+      document.getElementById('game-text-area').innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>存档已加载<br>前往主页开始新的一天</p></div>`;
+      showToast('存档已加载','success');
+    }catch(e){showToast('加载失败: '+e.message,'warning');}
+  });
+}
+window.loadFromSlot=loadFromSlot;
+
+function openSaveLoadModal(){
+  const st=sillytavernStore;
+  const allSlots=st.settings?.saveSlots?JSON.parse(st.settings.saveSlots):[];
+  const panel=document.getElementById('modal-saveload-panel');
+  let slotsHtml='';
+  for(let i=0;i<MAX_SAVE_SLOTS;i++){
+    const slot=allSlots[i];
+    const isAuto=i===0;
+    if(slot){
+      slotsHtml+=`<div class="item-row" style="cursor:pointer;padding:14px;" onclick="${isAuto?'loadFromSlot(0)':'event.stopPropagation()'}">
+        <div style="flex:1;"><div style="font-weight:600;font-size:0.85rem;">${isAuto?'自动存档':`存档位 ${i}`}</div>
+        <div style="font-size:0.73rem;color:var(--text-muted);margin-top:2px;">${slot.day?`第${slot.day}天·${slot.month}`:'空'} · ${slot.location||''}</div>
+        <div style="font-size:0.7rem;color:var(--text-muted);">${slot.summary?.slice(0,40)||''}</div>
+        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">好感:${slot.affection} · ${new Date(slot.timestamp).toLocaleString('zh-CN')}</div></div>
+        <div class="item-actions">${!isAuto?`<button class="modal-action-btn small" onclick="event.stopPropagation();loadFromSlot(${i})">读取</button>`:''}<button class="modal-action-btn small" onclick="event.stopPropagation();saveToSlot(${i})">覆盖</button>${!isAuto?`<button class="modal-action-btn small danger" onclick="event.stopPropagation();deleteSaveSlot(${i})">删除</button>`:''}</div>
+      </div>`;
+    }else{
+      slotsHtml+=`<div class="item-row" style="cursor:pointer;padding:14px;opacity:0.5;" onclick="saveToSlot(${i})">
+        <div style="flex:1;"><div style="font-weight:600;font-size:0.85rem;">${isAuto?'自动存档':`存档位 ${i}`}</div>
+        <div style="font-size:0.73rem;color:var(--text-muted);">空</div></div>
+        <button class="modal-action-btn small" onclick="event.stopPropagation();saveToSlot(${i})">保存</button>
+      </div>`;
+    }
+  }
+  panel.innerHTML=`
+    <div class="modal-header"><div><div class="modal-title">存档管理</div><div class="modal-subtitle">共 ${MAX_SAVE_SLOTS} 个存档位 · 包含全部游戏数据</div></div><button class="modal-close" onclick="closeModal('modal-saveload')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-body">
+      ${slotsHtml}
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="modal-action-btn" onclick="exportBackup()">导出备份</button>
+        <button class="modal-action-btn" onclick="triggerImportBackup()">导入备份</button>
+      </div>
+    </div>`;
+  document.getElementById('modal-saveload').classList.add('open');
+}
+window.openSaveLoadModal=openSaveLoadModal;
+
+async function deleteSaveSlot(slotIndex){
+  showConfirm('删除此存档？',async()=>{
+    const st=sillytavernStore;
+    const allSlots=st.settings?.saveSlots?JSON.parse(st.settings.saveSlots):[];
+    allSlots[slotIndex]=null;
+    st.settings.saveSlots=JSON.stringify(allSlots.filter(Boolean));
+    await saveSettings(st.settings);
+    await st.loadAll();
+    closeModal('modal-saveload');
+    openSaveLoadModal();
+    showToast('已删除','info');
+  });
+}
+window.deleteSaveSlot=deleteSaveSlot;
 
 function getMonth(){return MONTHS[currentDay-1]||'?'}
 function getKeyEvent(day){return KEY_EVENTS.find(e=>e.day===day)}
@@ -529,11 +675,14 @@ window.navigateTo=navigateTo;
 // ==================== HOME ====================
 function renderHome(){
   const female=gameCharacters[1];
-  const aff=typeof female.affection==='number'?female.affection:45;
+  const aff=typeof female.affection==='number'?female.affection:10;
   const lbl=getAffectionLabel(aff);
   const pct=Math.min(100,Math.max(0,aff));
   const evt=getKeyEvent(currentDay);
   const month=getMonth();
+
+  document.getElementById('home-role-title').textContent=`当前扮演：${getUserName()}`;
+  document.getElementById('home-role-desc').textContent=`对方角色为${getCharName()}`;
 
   const statusCard=document.getElementById('home-status-card');
   statusCard.innerHTML=`
@@ -682,6 +831,7 @@ async function saveGameState(){
     gameState_affection:gameCharacters[1].affection,
     gameState_diary:JSON.stringify(diaryEntries),
     gameState_previousAffection:previousAffection,
+    gameState_playerRole:playerRole,
   });
 }
 
@@ -693,6 +843,7 @@ async function loadGameState(){
     if(s.gameState_affection)gameCharacters[1].affection=s.gameState_affection;
     if(s.gameState_diary)diaryEntries=JSON.parse(s.gameState_diary);
     if(s.gameState_previousAffection)previousAffection=s.gameState_previousAffection;
+    if(s.gameState_playerRole)playerRole=s.gameState_playerRole;
   }
 }
 async function beginDayDialogue(){
@@ -747,8 +898,8 @@ ${evt?`本阶段关键词：${evt.name} — ${evt.desc}`:''}
 
     const {messages:promptMsgs}=assemblePrompt({
       userInput:userMsg.content,history:updatedMsgs,preset:activePreset||{},
-      lorebooks:activeBooks||[],userName:settings.userName||'林澈',
-      characterName:settings.characterName||'苏晚晴',
+      lorebooks:activeBooks||[],userName:getUserName(),
+      characterName:getCharName(),
       variables:currentVars,formatPrompt:getSystemPrompt()+'\n\n'+dayPrompt,
     });
 
@@ -822,7 +973,7 @@ async function endCurrentDay(){
     const {messages:promptMsgs}=assemblePrompt({
       userInput:userMsg.content,history:[...activeChat.messages,userMsg],
       preset:activePreset||{},lorebooks:st.lorebooks.filter(b=>st.activeLorebookIds.includes(b.id)),
-      userName:settings.userName||'林澈',characterName:settings.characterName||'苏晚晴',
+      userName:getUserName(),characterName:getCharName(),
       variables:currentVars,formatPrompt:getSystemPrompt(),
     });
 
@@ -926,6 +1077,7 @@ async function endCurrentDay(){
 
     renderHome();renderDiary();renderCharacters();
     saveGameState();
+    saveToSlot(0); // auto-save
 
     if(milestone)showToast(`关系变化：${milestone.label}`, 'success');
     if(evt)showToast(`关键事件：${evt.name}`, 'info');
@@ -974,8 +1126,8 @@ async function handleGameSend(){
 
     const {messages:promptMsgs}=assemblePrompt({
       userInput:text,history:updatedMsgs,preset:activePreset||{},
-      lorebooks:activeBooks||[],userName:settings.userName||'林澈',
-      characterName:settings.characterName||'苏晚晴',
+      lorebooks:activeBooks||[],userName:getUserName(),
+      characterName:getCharName(),
       variables:currentVars,formatPrompt:getSystemPrompt()+'\n\n'+contextPrompt,
     });
 
