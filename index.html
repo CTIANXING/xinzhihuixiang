@@ -656,8 +656,7 @@ function checkMilestone(oldVal,newVal){
 }
 
 function makeParser(){
-  const tags=sillytavernStore.settings?.customTags||['maintext','option','sum','vars','thinking','think'];
-  return new StreamTagParser(tags,['thinking','think']);
+  return new StreamTagParser(['maintext','option','sum','vars','thinking','think'],['thinking','think']);
 }
 
 // ==================== PARTICLES ====================
