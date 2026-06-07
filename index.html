@@ -333,6 +333,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div class="modal-overlay" id="modal-lorebook"><div class="modal-panel wide" id="modal-lorebook-panel"></div></div>
 <div class="modal-overlay" id="modal-preset"><div class="modal-panel" id="modal-preset-panel"></div></div>
 <div class="modal-overlay" id="modal-location"><div class="modal-panel" id="modal-location-panel"></div></div>
+<div class="modal-overlay" id="modal-backup"><div class="modal-panel" id="modal-backup-panel"></div></div>
 <div class="confirm-overlay" id="confirm-dialog"><div class="confirm-panel"><div class="confirm-message" id="confirm-message"></div><div class="confirm-buttons"><button class="confirm-btn cancel" onclick="hideConfirm()">取消</button><button class="confirm-btn confirm-action" id="confirm-action">确认</button></div></div></div>
 <div class="toast-container" id="toast-container"></div>
 
@@ -344,6 +345,7 @@ import {
   createDefaultPreset, DEFAULT_SETTINGS,
   StreamTagParser, aggregateEvents, applyParsedToChat,
   fetchModels, testConnection, assemblePrompt,
+  exportAllData, importAllData,
 } from './dist/game-bundle.js';
 
 // ==================== GAME CONSTANTS ====================
@@ -392,6 +394,13 @@ const GAME_SYSTEM_PROMPT_BASE = `你是文字冒险游戏《心之回响》的�
 
 ## 你的角色
 以混合叙事方式推进：你描述场景氛围 + 苏晚晴的言行心理。`;
+
+## 好感度规则（严格遵守）
+- 普通闲聊/日常对话：好感度增加 +1 或 +2
+- 情感共鸣/重要事件：好感度增加 +3 到 +5
+- 重大转折/真心告白：好感度增加 +6 到 +10
+- 负面互动（冷落/冲突）：好感度减少 -1 到 -3
+- 每天总量自动限制，你无需担心超出上限`;
 
 const VERBOSITY_PRESETS = {
   concise: {
@@ -1083,6 +1092,7 @@ async function openSettingsModal(){
         <button class="modal-action-btn primary" onclick="saveSettingsFromModal()">保存设置</button>
         <button class="modal-action-btn" onclick="openPresetModal()">管理预设</button>
         <button class="modal-action-btn" onclick="openLorebookModal()">世界书</button>
+        <button class="modal-action-btn" onclick="openBackupModal()">备份/恢复</button>
       </div>
     </div>`;
   document.getElementById('modal-settings').classList.add('open');
@@ -1275,16 +1285,19 @@ function editPresetQuick(id){
   panel.innerHTML=`
     <div class="modal-header"><div><div class="modal-title">编辑：${escapeHtml(p.name)}</div></div><button class="modal-close" onclick="closeModal('modal-preset')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">名称</label><input class="form-input" id="pe-name" value="${escapeHtml(p.name)}"></div>
-      <div class="form-group"><label class="form-label">模型 (留空=用设置)</label><input class="form-input" id="pe-model" value="${escapeHtml(s.openai_model||'')}"></div>
+      <div class="form-group"><label class="form-label">预设名称</label><input class="form-input" id="pe-name" value="${escapeHtml(p.name)}"></div>
+      <div class="form-group"><label class="form-label">Main Prompt（核心提示词，{{char}}=角色名 {{user}}=用户名）</label><textarea class="form-textarea" id="pe-main" rows="6" placeholder="在此编写发送给 AI 的核心系统提示词...">${escapeHtml(s.main||'')}</textarea></div>
+      <div class="form-group"><label class="form-label">Jailbreak Prompt（破限提示词，可选）</label><textarea class="form-textarea" id="pe-jailbreak" rows="3">${escapeHtml(s.jailbreak||'')}</textarea></div>
+      <div class="form-group"><label class="form-label">New Chat Prompt（新对话开场白模板）</label><textarea class="form-textarea" id="pe-newchat" rows="2">${escapeHtml(s.new_chat_prompt||'')}</textarea></div>
+      <div class="form-group" style="font-size:0.76rem;color:var(--text-muted);margin-top:16px;">—— 采样参数 ——</div>
+      <div class="form-group"><label class="form-label">模型覆盖（留空=使用设置中的模型）</label><input class="form-input" id="pe-model" value="${escapeHtml(s.openai_model||'')}" placeholder="留空则使用设置中的模型"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div class="form-group"><label class="form-label">Temperature</label><input class="form-input" id="pe-temp" type="number" step="0.01" min="0" max="2" value="${s.temp_openai??0.9}"></div>
+        <div class="form-group"><label class="form-label">Temperature</label><input class="form-input" id="pe-temp" type="number" step="0.01" min="0" max="2" value="${s.temp_openai??1.0}"></div>
         <div class="form-group"><label class="form-label">Top P</label><input class="form-input" id="pe-topp" type="number" step="0.01" min="0" max="1" value="${s.top_p_openai??0.95}"></div>
-        <div class="form-group"><label class="form-label">Max Tokens</label><input class="form-input" id="pe-maxtok" type="number" min="1" value="${s.openai_max_tokens??2048}"></div>
-        <div class="form-group"><label class="form-label">Max Context</label><input class="form-input" id="pe-maxctx" type="number" min="1" value="${s.openai_max_context??4096}"></div>
+        <div class="form-group"><label class="form-label">Max Tokens</label><input class="form-input" id="pe-maxtok" type="number" min="1" max="32768" value="${s.openai_max_tokens??4096}"></div>
+        <div class="form-group"><label class="form-label">Max Context</label><input class="form-input" id="pe-maxctx" type="number" min="1" max="1000000" value="${s.openai_max_context??200000}"></div>
       </div>
-      <div class="form-group"><label class="form-label">Main Prompt</label><textarea class="form-textarea" id="pe-main" rows="3">${escapeHtml(s.main||'')}</textarea></div>
-      <div style="display:flex;gap:6px;margin-top:12px;">
+      <div style="display:flex;gap:6px;margin-top:14px;">
         <button class="modal-action-btn" onclick="openPresetModal()">返回</button>
         <button class="modal-action-btn primary" onclick="savePresetEdit('${p.id}')">保存</button>
       </div>
@@ -1295,12 +1308,109 @@ window.editPresetQuick=editPresetQuick;
 async function savePresetEdit(id){
   const st=sillytavernStore;const p=st.presets.find(pr=>pr.id===id);if(!p)return;
   p.name=document.getElementById('pe-name')?.value?.trim()||p.name;
-  p.settings={...p.settings,openai_model:document.getElementById('pe-model')?.value?.trim()||'',temp_openai:parseFloat(document.getElementById('pe-temp')?.value)??0.9,top_p_openai:parseFloat(document.getElementById('pe-topp')?.value)??0.95,openai_max_tokens:parseInt(document.getElementById('pe-maxtok')?.value)||2048,openai_max_context:parseInt(document.getElementById('pe-maxctx')?.value)||4096,main:document.getElementById('pe-main')?.value||''};
+  p.settings={...p.settings,
+    openai_model:document.getElementById('pe-model')?.value?.trim()||'',
+    temp_openai:parseFloat(document.getElementById('pe-temp')?.value)??1.0,
+    top_p_openai:parseFloat(document.getElementById('pe-topp')?.value)??0.95,
+    openai_max_tokens:parseInt(document.getElementById('pe-maxtok')?.value)||4096,
+    openai_max_context:parseInt(document.getElementById('pe-maxctx')?.value)||200000,
+    main:document.getElementById('pe-main')?.value||'',
+    jailbreak:document.getElementById('pe-jailbreak')?.value||'',
+    new_chat_prompt:document.getElementById('pe-newchat')?.value||'',
+  };
   p.updatedAt=Date.now();
   await st.savePreset(p);await st.loadAll();
-  closeModal('modal-preset');openPresetModal();showToast('已保存','success');
+  closeModal('modal-preset');openPresetModal();showToast('预设已保存','success');
 }
 window.savePresetEdit=savePresetEdit;
+
+// ==================== BACKUP / RESTORE ====================
+async function openBackupModal(){
+  const panel=document.getElementById('modal-backup-panel');
+  panel.innerHTML=`
+    <div class="modal-header"><div><div class="modal-title">数据备份与恢复</div><div class="modal-subtitle">导出全部游戏数据到文件，或从备份文件恢复</div></div><button class="modal-close" onclick="closeModal('modal-backup')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-body">
+      <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.7;margin-bottom:18px;padding:14px;background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);">
+        备份包含：API设置、预设、世界书、会话记录、日记、好感度、游戏天数进度。<br>
+        备份文件保存在你的电脑上，Vercel 重部署后可以通过导入恢复。
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="modal-action-btn primary" onclick="exportBackup()" style="flex:1;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 导出备份
+        </button>
+        <button class="modal-action-btn" onclick="triggerImportBackup()" style="flex:1;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="3 10 12 15 21 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg> 导入备份
+        </button>
+        <input type="file" id="backup-file-input" accept=".json" style="display:none;" onchange="handleImportBackup(event)">
+      </div>
+    </div>`;
+  document.getElementById('modal-backup').classList.add('open');
+}
+window.openBackupModal=openBackupModal;
+
+async function exportBackup(){
+  try{
+    const backup=await exportAllData();
+    // Also inject game state
+    backup.gameState={
+      currentDay,todayLocation:todayLocation?.id||null,
+      dayStarted,messagesToday,currentRound,
+      affection:gameCharacters[1].affection,
+      previousAffection,affectionGainedToday,
+      diaryEntries,
+      dailyAffectionCap,
+      exportedAt:Date.now(),
+      version:'1.0',
+    };
+    const json=JSON.stringify(backup,null,2);
+    const blob=new Blob([json],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=`xinzhihuixiang-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);URL.revokeObjectURL(url);
+    showToast('备份已导出','success');
+  }catch(e){showToast('导出失败: '+e.message,'warning');}
+}
+window.exportBackup=exportBackup;
+
+function triggerImportBackup(){
+  document.getElementById('backup-file-input').click();
+}
+window.triggerImportBackup=triggerImportBackup;
+
+async function handleImportBackup(event){
+  const file=event.target.files?.[0];
+  if(!file)return;
+  try{
+    const text=await file.text();
+    const backup=JSON.parse(text);
+    showConfirm('导入备份将覆盖当前所有数据（设置、预设、世界书、会话、日记、进度）。确定继续？',async()=>{
+      try{
+        await importAllData(backup);
+        // Restore game state
+        if(backup.gameState){
+          currentDay=backup.gameState.currentDay||1;
+          dayStarted=false;messagesToday=0;currentRound=0;roundHistory=[];
+          if(backup.gameState.affection)gameCharacters[1].affection=backup.gameState.affection;
+          if(backup.gameState.diaryEntries)diaryEntries=backup.gameState.diaryEntries;
+          if(backup.gameState.previousAffection)previousAffection=backup.gameState.previousAffection;
+          if(backup.gameState.dailyAffectionCap)dailyAffectionCap=backup.gameState.dailyAffectionCap;
+          if(backup.gameState.todayLocation){
+            todayLocation=Locations.find(l=>l.id===backup.gameState.todayLocation)||null;
+          }
+        }
+        await sillytavernStore.loadAll();
+        saveGameState();
+        closeModal('modal-backup');
+        renderHome();renderDiary();renderCharacters();
+        showToast('备份已恢复，数据已同步','success');
+      }catch(e){showToast('恢复失败: '+e.message,'warning');}
+    });
+  }catch(e){showToast('文件读取失败: '+e.message,'warning');}
+  event.target.value='';
+}
+window.handleImportBackup=handleImportBackup;
 
 // ==================== MODAL UTILS ====================
 function closeModal(id){document.getElementById(id).classList.remove('open');}
@@ -1355,6 +1465,41 @@ async function initApp(){
     if(st.settings&&!st.settings.narrativeStyle){
       await st.updateSettings({narrativeStyle:'balanced'});
       await st.loadAll();
+    }
+
+    // Optimize default preset for DeepSeek
+    if(st.presets.length>0&&st.presets[0].name==='默认预设'){
+      const dp=st.presets[0];
+      const needsUpdate=!dp.settings.openai_max_context||dp.settings.openai_max_context<200000||dp.settings.temp_openai<0.9||!dp.settings.main||dp.settings.main.length<20;
+      if(needsUpdate){
+        dp.settings={...dp.settings,
+          openai_max_context:200000,openai_max_tokens:4096,
+          temp_openai:1.0,top_p_openai:0.95,
+          freq_pen_openai:0,pres_pen_openai:0,
+          stream_openai:false,openai_model:'',
+          main:'你是《心之回响》的剧情引擎。故事发生在第二中学，以混合叙事方式推进——你描述场景氛围和女主角苏晚晴的言行心理。语言要文学化、细腻、有温度，富有中式校园气息。',
+        };
+        dp.updatedAt=Date.now();
+        await savePreset(dp);await st.loadAll();
+      }
+    }
+
+    // Ensure world lorebook exists
+    const hasWorldBook=st.lorebooks.some(b=>b.name==='心之回响·世界观');
+    if(!hasWorldBook){
+      const worldBook=createDefaultLorebook('心之回响·世界观');
+      worldBook.description='第二中学校园世界观与场景角色设定 — 可在世界书管理页面编辑';
+      worldBook.entries=[
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['学校','校园','教室','二年A班','转校生','桃花','海棠','第二中学'],content:'第二中学，桃花与海棠正盛。二年A班，林澈是转校生，苏晚晴是班长。他们坐在相邻的座位上，窗外的花瓣偶尔飘进教室。',order:10},
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['天台','屋顶','风','天空','俯瞰'],content:'第二中学的天台视野开阔，午后的风轻轻吹过。这里是独自思考和偶然相遇的好地方，可以看到远处城市的天际线。',order:20},
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['公园','海棠','长椅','喷泉','黄昏','夕阳','人民公园'],content:'学校附近的人民公园，海棠花开的季节特别美。黄昏时夕阳透过花瓣洒下斑驳的光影，喷泉声清脆悦耳。',order:30},
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['奶茶店','放学后','饮料','甜点','约会','甜韵茶语'],content:'校旁奶茶店"甜韵茶语"，暖黄灯光，墙上贴满了学生的便利贴留言。角落卡座最受欢迎，放学后人流聚集地。',order:40},
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['林澈','转校生','摄影','内敛','安静','胶片相机'],content:'林澈是新来的转校生，性格内敛沉静。喜欢用一台旧胶片相机记录生活中的美好瞬间。话不多但观察力敏锐。',order:50},
+        {...createDefaultEntry(),id:crypto.randomUUID(),keys:['苏晚晴','班长','温柔','海棠','奶茶','责任心'],content:'苏晚晴是二年A班班长，温柔坚韧。喜欢海棠花和奶茶，放学后常去奶茶店坐一会儿。偶尔为小事固执己见，但总能暖心地照顾到每个人。',order:60},
+      ];
+      await saveLorebook(worldBook);await st.loadAll();
+      const freshBooks=await getLorebooks();
+      if(freshBooks.length>0){await st.updateSettings({activeLorebookIds:[freshBooks[0].id]});await st.loadAll();}
     }
 
     // Restore game state from DB
