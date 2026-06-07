@@ -1239,7 +1239,7 @@ function renderGameVars(vars, sum){
   if(aff!==undefined)entries.unshift(['好感度',aff]);
   if(entries.length===0){container.innerHTML='<div style="font-size:0.76rem;color:var(--text-muted);">暂无变量</div>';}
   else{container.innerHTML=entries.map(([k,v])=>`<div class="var-row"><span class="var-name">${escapeHtml(k)}</span><span class="var-value">${escapeHtml(String(v))}</span></div>`).join('');}
-  if(sum!==undefined)document.getElementById('sum-text').textContent=sum||'无摘要';
+  if(sum)document.getElementById('sum-text').textContent=sum;
   document.getElementById('round-label').textContent=`第 ${currentRound} 回合`;
 }
 
