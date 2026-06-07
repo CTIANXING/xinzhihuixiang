@@ -716,11 +716,10 @@ async function beginDayDialogue(){
   }
 
   const area=document.getElementById('game-text-area');
-  area.innerHTML='';
+  area.innerHTML='<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.85rem;">正在生成今日开场叙事...</div>';
   document.getElementById('game-options-area').innerHTML='';
   document.getElementById('game-loading').style.display='block';
   document.getElementById('game-scene-label').textContent=todayLocation.name;
-  document.getElementById('game-empty-msg').textContent='正在生成今日开场叙事...';
 
   const month=getMonth();
   const evt=getKeyEvent(currentDay);
