@@ -977,13 +977,14 @@ window.refreshGameUI=refreshGameUI;
 async function openSettingsModal(){
   const st=sillytavernStore;
   const s=st.settings||DEFAULT_SETTINGS;
+  const defs={baseUrl:'https://api.deepseek.com/v1',apiKey:'sk-ccac68b644c6409d9f70ce00fa5424f7',model:'deepseek-v4-pro'};
   const panel=document.getElementById('modal-settings-panel');
   panel.innerHTML=`
     <div class="modal-header"><div><div class="modal-title">设置</div><div class="modal-subtitle">配置 API 连接与游戏参数</div></div><button class="modal-close" onclick="closeModal('modal-settings')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">API 基础 URL</label><input class="form-input" id="s-baseUrl" value="${escapeHtml(s.api.baseUrl)}"></div>
-      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" id="s-apiKey" type="password" value="${escapeHtml(s.api.apiKey)}"></div>
-      <div class="form-group"><label class="form-label">模型</label><input class="form-input" id="s-model" value="${escapeHtml(s.api.model)}"><button class="modal-action-btn small" style="margin-top:4px;" onclick="fetchModelList()">获取模型列表</button></div>
+      <div class="form-group"><label class="form-label">API 基础 URL</label><input class="form-input" id="s-baseUrl" value="${escapeHtml(s.api.baseUrl||defs.baseUrl)}" placeholder="${escapeHtml(defs.baseUrl)}"></div>
+      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" id="s-apiKey" type="password" value="${escapeHtml(s.api.apiKey||defs.apiKey)}" placeholder="${escapeHtml(defs.apiKey)}"></div>
+      <div class="form-group"><label class="form-label">模型</label><input class="form-input" id="s-model" value="${escapeHtml(s.api.model||defs.model)}" placeholder="${escapeHtml(defs.model)}"><button class="modal-action-btn small" style="margin-top:4px;" onclick="fetchModelList()">获取模型列表</button></div>
       <div id="s-model-list" style="margin-top:4px;"></div>
       <div class="form-group"><label class="form-label">叙述风格</label><select class="form-select" id="s-narrativeStyle">${Object.entries(VERBOSITY_PRESETS).map(([k,v])=>`<option value="${k}" ${(s.narrativeStyle||'balanced')===k?'selected':''}>${v.label} — ${v.desc}</option>`).join('')}</select></div>
       <div class="form-group"><button class="modal-action-btn" onclick="testApiConnection()">测试连接</button><span id="s-conn-status" style="margin-left:8px;font-size:0.78rem;"></span></div>
@@ -1253,6 +1254,16 @@ async function initApp(){
     const st=sillytavernStore;
     if(st.settings&&(st.settings.characterName==='AI'||st.settings.userName==='用户')){
       await st.updateSettings({userName:'林澈',characterName:'苏晚晴'});
+      await st.loadAll();
+    }
+
+    // Patch empty API fields with DeepSeek defaults
+    if(st.settings&&(!st.settings.api?.baseUrl||st.settings.api?.baseUrl.includes('openai'))){
+      await st.updateSettings({api:{...st.settings.api,baseUrl:'https://api.deepseek.com/v1',apiKey:'sk-ccac68b644c6409d9f70ce00fa5424f7',model:'deepseek-v4-pro',timeout:120000,secondary:st.settings.api?.secondary||{enabled:false,baseUrl:'',apiKey:'',model:''}}});
+      await st.loadAll();
+    }
+    if(st.settings&&!st.settings.narrativeStyle){
+      await st.updateSettings({narrativeStyle:'balanced'});
       await st.loadAll();
     }
 
