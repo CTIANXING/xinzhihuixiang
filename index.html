@@ -298,7 +298,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="game-main">
           <div class="game-scene-header">
             <div class="game-scene-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="game-scene-label">未开始</span></div>
-            <div class="game-day-info"><span id="game-day-label">第1天·4月</span><span class="game-msg-counter" id="game-msg-counter">0/50</span></div>
+            <div class="game-day-info"><span id="game-day-label">第1天·4月</span><span class="game-msg-counter" id="game-msg-counter">0/20</span><button class="game-send-btn end" onclick="skipToday()" id="btn-skip-today" style="font-size:0.7rem;padding:5px 10px;margin-left:8px;" title="跳过今天直接结算">跳过</button><button class="game-send-btn end" onclick="endCurrentDay()" id="btn-end-today" style="font-size:0.7rem;padding:5px 10px;">结束今天</button></div>
           </div>
           <div class="game-text-area" id="game-text-area">
             <div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p id="game-empty-msg">请先在主页选择今日地点并开始新的一天</p></div>
@@ -312,12 +312,14 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         </div>
         <div class="game-sidebar">
           <div class="sidebar-panel">
-            <div class="sidebar-panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>变量</div>
+            <div class="sidebar-panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>当前回合</div>
+            <div style="font-size:0.76rem;color:var(--text-secondary);margin-bottom:6px;" id="round-label">第 0 回合</div>
             <div class="var-list" id="var-list"><div style="font-size:0.76rem;color:var(--text-muted);">暂无变量</div></div>
+            <div class="sum-text" id="sum-text" style="font-size:0.76rem;color:var(--text-muted);margin-top:8px;">等待剧情...</div>
           </div>
           <div class="sidebar-panel">
-            <div class="sidebar-panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>摘要</div>
-            <div class="sum-text" id="sum-text" style="font-size:0.76rem;color:var(--text-muted);">等待今日剧情...</div>
+            <div class="sidebar-panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>回合历史</div>
+            <div class="var-list" id="round-history" style="max-height:240px;overflow-y:auto;gap:3px;"></div>
           </div>
         </div>
       </div>
@@ -346,7 +348,8 @@ import {
 
 // ==================== GAME CONSTANTS ====================
 const MONTHS = ['4月','5月','6月','7月','9月','11月','1月','3月'];
-const MAX_MESSAGES_PER_DAY = 50;
+const MAX_MESSAGES_PER_DAY = 20;
+const DEFAULT_DAILY_AFFECTION_CAP = 15;
 const KEY_EVENTS = [
   {day:1,name:'开学·樱花季',desc:'新学期开始，樱花盛开的四月'},
   {day:2,name:'期中考试',desc:'期中考试周，图书馆里弥漫着紧张的氛围'},
@@ -433,10 +436,14 @@ let currentDay = 1;
 let todayLocation = null; // {id,name,type,...} or null
 let dayStarted = false;
 let messagesToday = 0;
+let currentRound = 0;
+let roundHistory = []; // [{round,userMsg,maintext,thinking,sum,variables}]
 let diaryEntries = []; // [{day, month, location, summary, affectionChange, isEvent}]
 let currentOptions = [];
 let storeReady = false;
-let previousAffection = 45; // for detecting milestone crossings
+let previousAffection = 10; // for detecting milestone crossings
+let affectionGainedToday = 0;
+let dailyAffectionCap = DEFAULT_DAILY_AFFECTION_CAP;
 
 function getMonth(){return MONTHS[currentDay-1]||'?'}
 function getKeyEvent(day){return KEY_EVENTS.find(e=>e.day===day)}
@@ -565,8 +572,11 @@ function selectTodayLocation(locId){
   gameCharacters[0].status=`${loc.name}内`;
   dayStarted=false;
   messagesToday=0;
+  currentRound=0;
+  roundHistory=[];
+  affectionGainedToday=0;
   document.getElementById('game-scene-label').textContent=loc.name;
-  document.getElementById('game-msg-counter').textContent='0/50';
+  document.getElementById('game-msg-counter').textContent='0/'+MAX_MESSAGES_PER_DAY;
   document.getElementById('game-msg-counter').classList.remove('warning');
 
   // Clear game area
@@ -638,7 +648,11 @@ async function beginDayDialogue(){
 
   dayStarted=true;
   messagesToday=0;
-  document.getElementById('game-msg-counter').textContent='0/50';
+  currentRound=0;
+  roundHistory=[];
+  affectionGainedToday=0;
+  dailyAffectionCap=sillytavernStore.settings?.dailyAffectionCap||DEFAULT_DAILY_AFFECTION_CAP;
+  document.getElementById('game-msg-counter').textContent=`0/${MAX_MESSAGES_PER_DAY}`;
   document.getElementById('game-msg-counter').classList.remove('warning');
 
   // Create or get active chat
@@ -707,8 +721,17 @@ ${evt?`本阶段关键词：${evt.name} — ${evt.desc}`:''}
     if(thinking)appendGameMessage('assistant',maintext,{thinking});
     else appendGameMessage('assistant',maintext,null);
     if(options.length>0){currentOptions=options;renderGameOptions(options);}
-    renderGameVars(nextVariables);
-    if(sum)document.getElementById('sum-text').textContent=sum;
+    const cappedVars={...nextVariables};
+    if(cappedVars['好感度']){
+      const proposed=parseInt(cappedVars['好感度']);
+      const available=Math.max(0,dailyAffectionCap-affectionGainedToday);
+      const applied=Math.min(Math.abs(proposed),available)*(proposed>=0?1:-1);
+      cappedVars['好感度']=applied;
+      affectionGainedToday+=Math.abs(applied);
+    }
+    renderGameVars(cappedVars,sum);
+    currentRound=1;
+    addRoundRecord(`第${currentDay}天·${month}，林澈来到了${todayLocation.name}。`,maintext,thinking,sum,cappedVars);
     messagesToday=1;
 
   }catch(e){showToast('开场生成失败: '+e.message,'warning');area.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>开场生成失败，请检查 API 配置后重试</p></div>`;dayStarted=false;}
@@ -734,8 +757,9 @@ async function endCurrentDay(){
 
     const month=getMonth();
     const evt=getKeyEvent(currentDay);
-    const endPrompt=`第${currentDay}天·${month}「${todayLocation?.name||'未知地点'}」的剧情已结束。${evt?`本日关键事件「${evt.name}」已触发。`:''}
-请以旁白视角写一段优美的日结摘要，概括今天发生的主要事件和情感变化。不需要选项，只需要<sum>和<maintext>标签。同时更新<vars>中的好感度。`;
+    const endPrompt=`第${currentDay}天·${month}「${todayLocation?.name||'未知地点'}」的剧情已结束。${evt?`本日关键事件「${evt.name}」。`:''}本日好感度变化：${affectionGainedToday}。
+以下是今日的回合摘要：${roundHistory.map(r=>`#${r.round}:${r.sum||'无'}`).join('；')}
+请以旁白视角写一段完整的日结摘要（200字左右），概括今天的主要事件和情感变化。用<sum>标签输出摘要，用<maintext>输出优美的日结叙事（可选）。更新<vars>中的好感度为综合变化值。`;
 
     const activePreset=st.presets.find(p=>p.id===settings.activePresetId)||st.presets[0];
     const currentVars=activeChat.variables||{};
@@ -767,16 +791,18 @@ async function endCurrentDay(){
     }
     await st.loadAll();
 
-    // Save diary
+    // Save comprehensive diary
     const oldAff=gameCharacters[1].affection;
-    const affChange=nextVariables['好感度']?parseInt(nextVariables['好感度']):0;
-    gameCharacters[1].affection=Math.min(100,Math.max(0,oldAff+affChange));
+    const finalAffChange=Math.min(affectionGainedToday,dailyAffectionCap);
+    gameCharacters[1].affection=Math.min(100,Math.max(0,oldAff+finalAffChange));
+    const summaryText=parsed.sum||parsed.maintext||summary;
+    diaryEntries.push({day:currentDay,month,location:todayLocation?.name||'未知',summary:summaryText,affectionChange:finalAffChange,isEvent:!!evt});
+    // Check milestone
     const milestone=checkMilestone(oldAff,gameCharacters[1].affection);
-    const isEvent=milestone||!!evt;
-    if(milestone)diaryEntries.push({day:currentDay,month,location:todayLocation?.name||'未知',summary:`${milestone.label} — 关系发生了变化`,affectionChange:affChange,isEvent:true});
-
-    diaryEntries.push({day:currentDay,month,location:todayLocation?.name||'未知',summary,affectionChange:affChange,isEvent});
-    previousAffection=gameCharacters[1].affection;
+    if(milestone){
+      diaryEntries.push({day:currentDay,month,location:todayLocation?.name||'未知',summary:`关系变化 — ${milestone.label}`,affectionChange:0,isEvent:true});
+      showToast(`关系变化：「${milestone.label}」`,'success');
+    }
 
     // Advance day
     currentDay++;
@@ -795,11 +821,17 @@ async function endCurrentDay(){
     todayLocation=null;
     dayStarted=false;
     messagesToday=0;
-    document.getElementById('game-msg-counter').textContent='0/50';
+    currentRound=0;
+    roundHistory=[];
+    affectionGainedToday=0;
+    document.getElementById('game-msg-counter').textContent='0/'+MAX_MESSAGES_PER_DAY;
+    document.getElementById('round-history').innerHTML='';
+    document.getElementById('round-label').textContent='第 0 回合';
     document.getElementById('game-scene-label').textContent='今日已结束';
+    document.getElementById('var-list').innerHTML='<div style="font-size:0.76rem;color:var(--text-muted);">暂无变量</div>';
     document.getElementById('sum-text').textContent='今日已结算，可进入下一天';
     document.getElementById('game-options-area').innerHTML='';
-    document.getElementById('game-text-area').innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>今日剧情已结束<br>「${summary}」<br>前往主页开始新的一天</p></div>`;
+    document.getElementById('game-text-area').innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>今日剧情已结束<br>「${summaryText}」<br>前往主页开始新的一天</p></div>`;
 
     renderHome();renderDiary();renderCharacters();
 
@@ -885,25 +917,33 @@ async function handleGameSend(){
     else appendGameMessage('assistant',maintext,null);
 
     if(options.length>0){currentOptions=options;renderGameOptions(options);}
-    renderGameVars(nextVariables);
-    if(sum)document.getElementById('sum-text').textContent=sum;
-
-    // Check if should force end day
-    if(messagesToday>=MAX_MESSAGES_PER_DAY){
-      showToast('今日对话已达上限，正在结算...','info');
-      setTimeout(()=>endCurrentDay(),500);
+    const cappedVars={...nextVariables};
+    if(cappedVars['好感度']){
+      const proposed=parseInt(cappedVars['好感度']);
+      const available=Math.max(0,dailyAffectionCap-affectionGainedToday);
+      const applied=Math.min(Math.abs(proposed),available)*(proposed>=0?1:-1);
+      cappedVars['好感度']=applied;
+      affectionGainedToday+=Math.abs(applied);
     }
+    renderGameVars(cappedVars,sum);
+    currentRound++;
+    addRoundRecord(text,maintext,thinking,sum,cappedVars);
 
-    // Update affection from vars
-    const affChange=nextVariables['好感度']?parseInt(nextVariables['好感度']):0;
+    // Apply capped affection
+    const affChange=affectionGainedToday>0?cappedVars['好感度']?parseInt(cappedVars['好感度']):0:0;
     if(affChange!==0){
       const oldAff=gameCharacters[1].affection;
       gameCharacters[1].affection=Math.min(100,Math.max(0,oldAff+affChange));
       const milestone=checkMilestone(oldAff,gameCharacters[1].affection);
-      if(milestone)showToast(`关系变化：「${milestone.label}」`, 'success');
+      if(milestone)showToast(`关系变化：「${milestone.label}」`,'success');
       previousAffection=gameCharacters[1].affection;
       renderHome();
       renderCharacters();
+    }
+
+    if(messagesToday>=MAX_MESSAGES_PER_DAY){
+      showToast('今日对话已达上限，正在结算...','info');
+      setTimeout(()=>endCurrentDay(),500);
     }
 
   }catch(e){
@@ -955,14 +995,39 @@ function selectGameOption(idx){
 }
 window.selectGameOption=selectGameOption;
 
-function renderGameVars(vars){
+function renderGameVars(vars, sum){
   const container=document.getElementById('var-list');
   const entries=Object.entries(vars||{}).filter(([k])=>k!=='好感度');
   const aff=vars?.['好感度'];
   if(aff!==undefined)entries.unshift(['好感度',aff]);
-  if(entries.length===0){container.innerHTML='<div style="font-size:0.76rem;color:var(--text-muted);">暂无变量</div>';return;}
-  container.innerHTML=entries.map(([k,v])=>`<div class="var-row"><span class="var-name">${escapeHtml(k)}</span><span class="var-value">${escapeHtml(String(v))}</span></div>`).join('');
+  if(entries.length===0){container.innerHTML='<div style="font-size:0.76rem;color:var(--text-muted);">暂无变量</div>';}
+  else{container.innerHTML=entries.map(([k,v])=>`<div class="var-row"><span class="var-name">${escapeHtml(k)}</span><span class="var-value">${escapeHtml(String(v))}</span></div>`).join('');}
+  if(sum!==undefined)document.getElementById('sum-text').textContent=sum||'无摘要';
+  document.getElementById('round-label').textContent=`第 ${currentRound} 回合`;
 }
+
+function addRoundRecord(userMsg,maintext,thinking,sum,vars){
+  roundHistory.push({round:currentRound,userMsg,maintext:maintext?.slice(0,80),thinking:thinking?.slice(0,80),sum:sum||'',variables:{...vars}});
+  const container=document.getElementById('round-history');
+  container.innerHTML=roundHistory.map((r,i)=>`<div class="var-row" style="cursor:pointer;padding:6px 8px;" onclick="showRoundDetail(${i})" id="rh-${i}"><span style="font-size:0.73rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">#${r.round} ${escapeHtml(r.sum||r.userMsg?.slice(0,20)||'回合')}</span></div>`).join('');
+}
+
+function showRoundDetail(idx){
+  const r=roundHistory[idx];
+  if(!r)return;
+  renderGameVars(r.variables,r.sum||'');
+  document.getElementById('round-label').textContent=`第 ${r.round} 回合 (历史)`;
+}
+window.showRoundDetail=showRoundDetail;
+
+function skipToday(){
+  if(!dayStarted){showToast('今天尚未开始','warning');return;}
+  showConfirm('跳过今天？将使用当前对话内容直接生成日结摘要。',async()=>{
+    dayStarted=true;
+    await endCurrentDay();
+  });
+}
+window.skipToday=skipToday;
 
 function refreshGameUI(){
   const st=sillytavernStore;
@@ -987,6 +1052,7 @@ async function openSettingsModal(){
       <div class="form-group"><label class="form-label">模型</label><input class="form-input" id="s-model" value="${escapeHtml(s.api.model||defs.model)}" placeholder="${escapeHtml(defs.model)}"><button class="modal-action-btn small" style="margin-top:4px;" onclick="fetchModelList()">获取模型列表</button></div>
       <div id="s-model-list" style="margin-top:4px;"></div>
       <div class="form-group"><label class="form-label">叙述风格</label><select class="form-select" id="s-narrativeStyle">${Object.entries(VERBOSITY_PRESETS).map(([k,v])=>`<option value="${k}" ${(s.narrativeStyle||'balanced')===k?'selected':''}>${v.label} — ${v.desc}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">每日好感度上限</label><input class="form-input" id="s-affCap" type="number" min="1" max="100" value="${s.dailyAffectionCap||DEFAULT_DAILY_AFFECTION_CAP}"></div>
       <div class="form-group"><button class="modal-action-btn" onclick="testApiConnection()">测试连接</button><span id="s-conn-status" style="margin-left:8px;font-size:0.78rem;"></span></div>
       <div class="form-group"><label class="form-label">你的角色名</label><input class="form-input" id="s-userName" value="${escapeHtml(s.userName)}"></div>
       <div class="form-group"><label class="form-label">AI 角色名</label><input class="form-input" id="s-characterName" value="${escapeHtml(s.characterName)}"></div>
@@ -1006,6 +1072,7 @@ async function saveSettingsFromModal(){
     api:{baseUrl:document.getElementById('s-baseUrl').value.trim(),apiKey:document.getElementById('s-apiKey').value.trim(),model:document.getElementById('s-model').value.trim(),timeout:120000,secondary:st.settings?.api?.secondary||{enabled:false,baseUrl:'',apiKey:'',model:''}},
     userName:document.getElementById('s-userName').value.trim(),characterName:document.getElementById('s-characterName').value.trim(),
     narrativeStyle:document.getElementById('s-narrativeStyle')?.value||'balanced',
+    dailyAffectionCap:parseInt(document.getElementById('s-affCap')?.value)||DEFAULT_DAILY_AFFECTION_CAP,
   });
   await st.loadAll();
   closeModal('modal-settings');
