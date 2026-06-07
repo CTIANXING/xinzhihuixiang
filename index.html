@@ -257,10 +257,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
             <h3 id="home-action-title">开始新的一天</h3>
             <p id="home-action-desc">前往地图选择今天要去的地方</p>
           </div>
-          <div class="home-action-card" onclick="saveToSlot(0);showToast('已保存到自动存档','success')" id="home-action-save">
-            <h3>快速存档</h3>
-            <p>保存当前进度到自动存档位</p>
-          </div>
           <div class="home-action-card" onclick="openSaveLoadModal()" id="home-action-load">
             <h3>读取存档</h3>
             <p>浏览、读取或管理所有存档位</p>
@@ -310,7 +306,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="game-main">
           <div class="game-scene-header">
             <div class="game-scene-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="game-scene-label">未开始</span></div>
-            <div class="game-day-info"><span id="game-day-label">第1天·4月</span><span class="game-msg-counter" id="game-msg-counter">0/20</span><button class="game-send-btn end" onclick="skipToday()" id="btn-skip-today" style="font-size:0.7rem;padding:5px 10px;margin-left:4px;">跳过</button><button class="game-send-btn end" onclick="endCurrentDay()" id="btn-end-today" style="font-size:0.7rem;padding:5px 10px;">结束</button><button class="game-send-btn" onclick="saveToSlot(0)" id="btn-save-game" style="font-size:0.7rem;padding:5px 10px;background:rgba(255,255,255,0.1);">存档</button></div>
+            <div class="game-day-info"><span id="game-day-label">第1天·4月</span><span class="game-msg-counter" id="game-msg-counter">0/20</span><button class="game-send-btn end" onclick="skipToday()" id="btn-skip-today" style="font-size:0.7rem;padding:5px 10px;margin-left:4px;">跳过</button><button class="game-send-btn end" onclick="endCurrentDay()" id="btn-end-today" style="font-size:0.7rem;padding:5px 10px;">结束</button><button class="game-send-btn" onclick="openSaveLoadModal()" id="btn-save-game" style="font-size:0.7rem;padding:5px 10px;background:rgba(255,255,255,0.1);">存档</button></div>
           </div>
           <div class="game-text-area" id="game-text-area">
             <div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p id="game-empty-msg">请先在主页选择今日地点并开始新的一天</p></div>
@@ -348,6 +344,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 <div class="modal-overlay" id="modal-backup"><div class="modal-panel" id="modal-backup-panel"></div></div>
 <div class="modal-overlay" id="modal-saveload"><div class="modal-panel wide" id="modal-saveload-panel"></div></div>
 <div class="confirm-overlay" id="confirm-dialog"><div class="confirm-panel"><div class="confirm-message" id="confirm-message"></div><div class="confirm-buttons"><button class="confirm-btn cancel" onclick="hideConfirm()">取消</button><button class="confirm-btn confirm-action" id="confirm-action">确认</button></div></div></div>
+<input type="file" id="global-backup-input" accept=".json" style="display:none;" onchange="handleImportBackup(event)">
 <div class="toast-container" id="toast-container"></div>
 
 <script type="module">
@@ -1585,7 +1582,7 @@ async function exportBackup(){
 window.exportBackup=exportBackup;
 
 function triggerImportBackup(){
-  document.getElementById('backup-file-input').click();
+  document.getElementById('global-backup-input').click();
 }
 window.triggerImportBackup=triggerImportBackup;
 
