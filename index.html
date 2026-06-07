@@ -957,8 +957,7 @@ ${evt?`本阶段关键词：${evt.name} — ${evt.desc}`:''}
     if(cappedVars['好感度']){
       const proposed=parseInt(cappedVars['好感度']);
       const available=Math.max(0,dailyAffectionCap-affectionGainedToday);
-      const perRoundCap=Math.abs(proposed)>3?3:Math.abs(proposed);
-      const applied=Math.min(perRoundCap,available)*(proposed>=0?1:-1);
+      const applied=Math.min(Math.abs(proposed),available)*(proposed>=0?1:-1);
       cappedVars['好感度']=applied;
       affectionGainedToday+=Math.abs(applied);
     }
@@ -1198,8 +1197,7 @@ async function handleGameSend(){
     if(cappedVars['好感度']){
       const proposed=parseInt(cappedVars['好感度']);
       const available=Math.max(0,dailyAffectionCap-affectionGainedToday);
-      const perRoundCap=Math.abs(proposed)>3?3:Math.abs(proposed);
-      const applied=Math.min(perRoundCap,available)*(proposed>=0?1:-1);
+      const applied=Math.min(Math.abs(proposed),available)*(proposed>=0?1:-1);
       cappedVars['好感度']=applied;
       affectionGainedToday+=Math.abs(applied);
     }
