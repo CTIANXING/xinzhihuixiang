@@ -940,6 +940,51 @@ import {
   extractVariables, mergeVariables, formatVariablesForPrompt
 } from './dist/game-bundle.js';
 
+// ==================== DEFAULT GAME CONTEXT ====================
+const GAME_SYSTEM_PROMPT = `你是文字冒险游戏《心之回响》的剧情引擎。
+
+## 核心设定
+- 故事类型：现代都市校园恋爱剧情
+- 男主角：林澈 (Lin Che) — 转校生，内敛沉静、善于观察、内心温柔，二年A班
+- 女主角：苏晚晴 (Su Wanqing) — 班长，温柔坚韧、善解人意、偶尔固执，二年A班
+- 世界观：现代都市校园，樱花季。地点包括教室、天台、公园、奶茶店
+- 主题：青春、相遇、选择、成长
+- 风格：日式 Galgame 叙事，细腻的心理描写，温暖的日常与微妙的感情变化
+
+## 你的角色
+你现在扮演"剧情旁白 + 女主角苏晚晴"，以混合叙事方式推进故事。你描述场景、氛围和苏晚晴的言行心理。
+
+## 输出格式（严格遵守，禁止使用 Markdown 代码块包裹）
+你必须每回合按以下 XML 标签输出：
+
+<thinking>
+这里用中文写你的推理过程：当前场景状态、角色心理、剧情发展方向
+</thinking>
+
+<maintext>
+正文叙事内容。可以多段落，保持换行。用文学化的语言描述场景、人物动作对话和心理。
+</maintext>
+
+<option>
+选项文字A
+选项文字B
+选项文字C
+</option>
+
+<sum>
+一句话概括本回合发生的事
+</sum>
+
+<vars>
+{ "好感度": 5 }
+</vars>
+
+注意：
+- <maintext> 和 <option> 必须存在
+- <option> 至少 2 个选项，每行一个，不要编号
+- 选项要推动剧情发展，引导玩家做出有意义的抉择
+- <vars> 中的好感度每次更新为正负整数（如 +5 或 -3），JSON 格式`;
+
 // ==================== GALGAME DATA ====================
 const Locations = [
   { id:'rooftop',name:'天台',type:'rooftop',description:'午后的风轻轻拂过，天空澄澈如洗。这里是整座学校视野最好的地方，也是独自思考与偶然邂逅的场所。远处城市的轮廓在薄雾中若隐若现。',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>',characters:['female'],timeSensitive:'午后阳光最佳' },
@@ -1208,14 +1253,7 @@ async function handleGameSend(){
   document.getElementById('game-options-area').innerHTML = '';
   currentOptions = [];
 
-  // Show loading
-  const textArea = document.getElementById('game-text-area');
-  const empty = textArea.querySelector('.empty-state');
-  if(empty) empty.style.display = 'none';
   document.getElementById('game-loading').style.display = 'block';
-
-  // Append user message to display
-  appendGameMessage('user', text, null);
 
   try {
     const st = sillytavernStore;
@@ -1229,28 +1267,26 @@ async function handleGameSend(){
     const activeBooks = st.lorebooks.filter(b=>st.activeLorebookIds.includes(b.id));
     const currentVars = activeChat.variables || {};
 
-    // Assemble prompt via store's internal logic
     const userMsg = { id: crypto.randomUUID(), role: 'user', content: text, timestamp: Date.now(), variables: { ...currentVars } };
     const updatedMsgs = [...activeChat.messages, userMsg];
 
-    // Build request
     const { messages: promptMsgs } = assemblePrompt({
       userInput: text,
       history: updatedMsgs,
       preset: activePreset,
       lorebooks: activeBooks,
-      userName: settings.userName,
-      characterName: settings.characterName,
+      userName: settings.userName || '林澈',
+      characterName: settings.characterName || '苏晚晴',
       variables: currentVars,
-      formatPrompt: settings.formatPromptTemplate || DEFAULT_FORMAT_PROMPT,
+      formatPrompt: GAME_SYSTEM_PROMPT,
     });
 
     const body = {
       model: settings.api.model || activePreset.settings.openai_model || 'gpt-3.5-turbo',
       messages: promptMsgs,
-      temperature: activePreset.settings.temp_openai ?? 0.8,
+      temperature: activePreset.settings.temp_openai ?? 0.9,
       max_tokens: activePreset.settings.openai_max_tokens ?? 2048,
-      top_p: activePreset.settings.top_p_openai ?? 0.9,
+      top_p: activePreset.settings.top_p_openai ?? 0.95,
       frequency_penalty: activePreset.settings.freq_pen_openai ?? 0,
       presence_penalty: activePreset.settings.pres_pen_openai ?? 0,
       stream: false,
@@ -1262,28 +1298,29 @@ async function handleGameSend(){
       body: JSON.stringify(body),
     });
 
-    if(!resp.ok) throw new Error(`API error ${resp.status}: ${await resp.text().then(t=>t.slice(0,200))}`);
+    if(!resp.ok) throw new Error(`API error ${resp.status}: ${await resp.text().then(t=>t.slice(0,300))}`);
 
     const data = await resp.json();
     const rawReply = data.choices?.[0]?.message?.content || '';
 
-    // Parse tags
     const parser = makeParser();
     const events = parser.feed(rawReply);
     const finalEvents = parser.finish();
-    const allEvents = [...events, ...finalEvents];
-    const parsed = aggregateEvents(allEvents);
+    const parsed = aggregateEvents([...events, ...finalEvents]);
 
-    // Update variables
+    const maintext = parsed.maintext || rawReply;
+    const options = (parsed.options && parsed.options.length > 0) ? parsed.options.filter(o=>o.trim()) : [];
+    const thinking = parsed.thinking || '';
+    const sum = parsed.sum || '';
+
     const { nextVariables } = applyParsedToChat(currentVars, parsed);
 
-    // Save as chat message
     const assistantMsg = {
       id: crypto.randomUUID(), role: 'assistant', content: rawReply, timestamp: Date.now(),
-      variables: { ...nextVariables }, parsed,
+      variables: { ...nextVariables },
+      parsed: { maintext, options, thinking, sum, varsRaw: parsed.varsRaw, varsCommands: parsed.varsCommands, unknown: parsed.unknown },
     };
 
-    // Manually update the chat (bypassing store's sendMessage for game mode tag parsing)
     const chats = await getChats();
     const chat = chats.find(c=>c.id===activeChat.id);
     if(chat){
@@ -1291,39 +1328,35 @@ async function handleGameSend(){
       await saveChat(updatedChat);
     }
 
-    // Refresh store
     await st.loadAll();
-    if(chat){
-      const freshChats = await getChats();
-      const freshChat = freshChats.find(c=>c.id===activeChat.id);
-      if(freshChat) st.loadChat(freshChat.id);
+    const freshChats = await getChats();
+    const freshChat = freshChats.find(c=>c.id===activeChat.id);
+    if(freshChat) st.loadChat(freshChat.id);
+
+    // Full re-render — no manual DOM append
+    const area = document.getElementById('game-text-area');
+    area.innerHTML = '';
+    refreshGameUI();
+
+    if(options.length > 0){
+      currentOptions = options;
+      renderGameOptions(options);
     }
 
-    // Display
-    appendGameMessage('assistant', parsed.maintext, { thinking: parsed.thinking, sum: parsed.sum, raw: rawReply });
-
-    // Options
-    if(parsed.options && parsed.options.length > 0){
-      currentOptions = parsed.options.filter(o=>o.trim());
-      renderGameOptions(currentOptions);
-    }
-
-    // Update sidebar
     renderGameVars(nextVariables);
-    if(parsed.sum) document.getElementById('sum-text').textContent = parsed.sum;
+    if(sum) document.getElementById('sum-text').textContent = sum;
 
   } catch(e) {
     const errMsg = e.message || String(e);
-    const suggestion = errMsg.includes('invalid_request_error') ? ' (模型名错误，请在设置或预设中配置正确模型)' :
-      errMsg.includes('401') ? ' (API Key 无效)' :
-      errMsg.includes('404') ? ' (API 地址错误)' : '';
+    const suggestion = errMsg.includes('invalid_request_error') ? ' (模型名错误，请在设置中配置正确模型或到预设编辑器中修改)' :
+      errMsg.includes('401') ? ' (API Key 无效，请在设置中配置)' :
+      errMsg.includes('404') ? ' (API 地址错误，请检查设置中的 Base URL)' : '';
     showToast('请求失败: ' + errMsg + suggestion, 'warning');
   } finally {
     document.getElementById('game-loading').style.display = 'none';
     document.getElementById('game-input').disabled = false;
     document.getElementById('game-send-btn').disabled = false;
     document.getElementById('game-input').focus();
-    refreshGameUI();
   }
 }
 window.handleGameSend = handleGameSend;
@@ -1425,19 +1458,20 @@ function refreshGameUI(){
   const activeChat = st.activeChat;
   if(activeChat && activeChat.messages.length > 0){
     const area = document.getElementById('game-text-area');
-    const empty = area.querySelector('.empty-state');
-    if(empty) empty.style.display = 'none';
+    // Remove any lingering empty-state divs
+    const empties = area.querySelectorAll('.empty-state');
+    empties.forEach(e=>e.remove());
     // Show last few messages
-    const recent = activeChat.messages.slice(-10);
+    const recent = activeChat.messages.slice(-12);
     for(const msg of recent){
       const existing = document.getElementById('gm-rendered-'+msg.id);
       if(!existing){
         const role = msg.role;
         const parsed = msg.parsed;
-        if(parsed){
-          appendGameMessage(role, parsed.maintext||msg.content.slice(0,200), { thinking: parsed.thinking, sum: parsed.sum });
+        if(parsed && parsed.maintext){
+          appendGameMessage(role, parsed.maintext, { thinking: parsed.thinking, sum: parsed.sum });
         } else {
-          appendGameMessage(role, msg.content.slice(0,500), null);
+          appendGameMessage(role, msg.content.slice(0,800), null);
         }
         const lastDiv = area.lastElementChild;
         if(lastDiv) lastDiv.id = 'gm-rendered-'+msg.id;
@@ -1445,6 +1479,15 @@ function refreshGameUI(){
     }
     // Vars
     renderGameVars(activeChat.variables||{});
+    // Summary from last message
+    const lastMsg = activeChat.messages[activeChat.messages.length-1];
+    if(lastMsg?.parsed?.sum) document.getElementById('sum-text').textContent = lastMsg.parsed.sum;
+  } else {
+    // No messages — show empty state
+    const area = document.getElementById('game-text-area');
+    if(!area.querySelector('.empty-state')){
+      area.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><p>输入你的行动，或者点击预设选项开始故事...</p></div>`;
+    }
   }
 
   document.getElementById('game-scene-info').textContent = st.settings?.api?.model ? `模型: ${st.settings.api.model}` : '';
@@ -1876,9 +1919,81 @@ async function initApp(){
     await sillytavernStore.loadAll();
     storeReady = true;
 
+    // Set game defaults on first run
     if(!sillytavernStore.settings){
-      await saveSettings(DEFAULT_SETTINGS);
+      const gameSettings = {
+        ...DEFAULT_SETTINGS,
+        userName: '林澈',
+        characterName: '苏晚晴',
+        uiMode: 'game',
+      };
+      await saveSettings(gameSettings);
       await sillytavernStore.loadAll();
+    }
+
+    // Ensure character names are correct
+    const st = sillytavernStore;
+    if(st.settings && (st.settings.characterName === 'AI' || st.settings.userName === '用户')){
+      await st.updateSettings({ userName: '林澈', characterName: '苏晚晴' });
+      await st.loadAll();
+    }
+
+    // Create default lorebook with world context if none exist
+    if(st.lorebooks.length === 0){
+      const worldBook = createDefaultLorebook('心之回响·世界观');
+      worldBook.description = '游戏核心世界观与场景设定';
+      worldBook.entries = [
+        {
+          ...createDefaultEntry(),
+          id: crypto.randomUUID(),
+          keys: ['学校','校园','教室','班级','二年A班','转校生','樱花'],
+          content: '这是春日的樱华学园，樱花正值盛开季节。二年A班的教室里阳光明媚，新的学期刚刚开始。林澈是转校生，苏晚晴是班长。他们坐在相邻的座位上。',
+          order: 10,
+        },
+        {
+          ...createDefaultEntry(),
+          id: crypto.randomUUID(),
+          keys: ['天台','屋顶','高处','风','天空'],
+          content: '学校的天台是整栋建筑视野最好的地方。午后的风轻轻吹过，可以俯瞰整个校园和远处的城市轮廓。这里常是学生独自思考或偶然相遇的地点。',
+          order: 20,
+        },
+        {
+          ...createDefaultEntry(),
+          id: crypto.randomUUID(),
+          keys: ['公园','散步','长椅','樱花树','喷泉','黄昏','夕阳'],
+          content: '学校附近的公园里有一条樱花林荫道。傍晚时分夕阳很美，喷泉的水声清脆。这里的长椅是情侣们的热门约会地，也是独自思考和偶遇的好地方。',
+          order: 30,
+        },
+        {
+          ...createDefaultEntry(),
+          id: crypto.randomUUID(),
+          keys: ['奶茶店','放学后','饮料','约会','甜点'],
+          content: '学校附近的奶茶店叫"甜韵茶语"，暖黄色灯光，角落的卡座很受欢迎。这里的季节限定口味总是很受欢迎。放学后经常有学生在这里聊天写作业。',
+          order: 40,
+        },
+        {
+          ...createDefaultEntry(),
+          id: crypto.randomUUID(),
+          keys: ['林澈','转校生','摄影','内敛','安静'],
+          content: '林澈是刚从其他城市转来的转校生。他性格内敛沉静，不太善于与陌生人交谈，但善于观察身边的事物。爱好摄影，常用相机记录生活中的美好瞬间。',
+          order: 50,
+        },
+        {
+          ...createDefaultEntry(),
+          id: crypto.randomUUID(),
+          keys: ['苏晚晴','班长','温柔','樱花','奶茶','责任心'],
+          content: '苏晚晴是二年A班的班长。她温柔而坚韧，总是把班级事务处理得井井有条。她特别喜欢樱花和奶茶，放学后常常去奶茶店坐一会儿。她偶尔会为一些小事固执己见。',
+          order: 60,
+        },
+      ];
+      await saveLorebook(worldBook);
+      await st.loadAll();
+      // Auto-activate the world lorebook
+      const freshBooks = await getLorebooks();
+      if(freshBooks.length > 0){
+        await st.updateSettings({ activeLorebookIds: [freshBooks[0].id] });
+        await st.loadAll();
+      }
     }
 
     renderStory();
