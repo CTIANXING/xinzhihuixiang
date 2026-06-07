@@ -560,6 +560,11 @@ async function loadFromSlot(slotIndex){
           roundHistory=[];
         }
         await sillytavernStore.loadAll();
+      // Restore active chat
+      const st2=sillytavernStore;
+      if(st2.chats.length>0&&!st2.activeChatId){
+        st2.loadChat(st2.chats[st2.chats.length-1].id);
+      }
       saveGameState();
       justLoaded=true;
       closeModal('modal-saveload');
@@ -1640,6 +1645,10 @@ async function handleImportBackup(event){
         roundHistory=[];
       }
       await sillytavernStore.loadAll();
+      // Restore active chat after import
+      if(sillytavernStore.chats.length>0&&!sillytavernStore.activeChatId){
+        sillytavernStore.loadChat(sillytavernStore.chats[sillytavernStore.chats.length-1].id);
+      }
         saveGameState();
         justLoaded=true;
         closeModal('modal-backup');
