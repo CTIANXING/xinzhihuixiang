@@ -505,13 +505,16 @@ async function makeStateSnapshot(){
   return data;
 }
 
-async function saveToSlot(slotIndex){
+async function saveToSlot(slotIndex, customName){
   try{
     const snap=await makeStateSnapshot();
     const loc=Locations.find(l=>l.id===snap.gameState.todayLocation);
+    if(customName===undefined&&slotIndex!==0){
+      customName=prompt('存档名称（留空使用默认）：',`存档 ${slotIndex}`);
+    }
     const slot={
       index:slotIndex,
-      name:slotIndex===0?'自动存档':`存档 ${slotIndex}`,
+      name:slotIndex===0?'自动存档':(customName||`存档 ${slotIndex}`),
       timestamp:Date.now(),
       day:currentDay,
       month:getMonth(),
@@ -522,12 +525,16 @@ async function saveToSlot(slotIndex){
       data:snap,
     };
     const st=sillytavernStore;
+    await st.loadAll();
     const allSlots=st.settings?.saveSlots?JSON.parse(st.settings.saveSlots):[];
     allSlots[slotIndex]=slot;
     st.settings.saveSlots=JSON.stringify(allSlots);
     await saveSettings(st.settings);
     await st.loadAll();
-    showToast(`已保存到${slot.name}`,'success');
+    if(document.getElementById('modal-saveload').classList.contains('open')){
+      openSaveLoadModal();
+    }
+    showToast(`已保存到「${slot.name}」`,'success');
   }catch(e){showToast('保存失败: '+e.message,'warning');}
 }
 window.saveToSlot=saveToSlot;
@@ -577,7 +584,8 @@ async function loadFromSlot(slotIndex){
 }
 window.loadFromSlot=loadFromSlot;
 
-function openSaveLoadModal(){
+async function openSaveLoadModal(){
+  await sillytavernStore.loadAll();
   const st=sillytavernStore;
   const allSlots=st.settings?.saveSlots?JSON.parse(st.settings.saveSlots):[];
   const panel=document.getElementById('modal-saveload-panel');
@@ -591,13 +599,13 @@ function openSaveLoadModal(){
         <div style="font-size:0.73rem;color:var(--text-muted);margin-top:2px;">${slot.day?`第${slot.day}天·${slot.month}`:'空'} · ${slot.location||''}</div>
         <div style="font-size:0.7rem;color:var(--text-muted);">${slot.summary?.slice(0,40)||''}</div>
         <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">好感:${slot.affection} · ${new Date(slot.timestamp).toLocaleString('zh-CN')}</div></div>
-        <div class="item-actions">${!isAuto?`<button class="modal-action-btn small" onclick="event.stopPropagation();loadFromSlot(${i})">读取</button>`:''}<button class="modal-action-btn small" onclick="event.stopPropagation();saveToSlot(${i})">覆盖</button>${!isAuto?`<button class="modal-action-btn small danger" onclick="event.stopPropagation();deleteSaveSlot(${i})">删除</button>`:''}</div>
+        <div class="item-actions">${!isAuto?`<button class="modal-action-btn small" onclick="event.stopPropagation();loadFromSlot(${i})">读取</button>`:''}<button class="modal-action-btn small" onclick="event.stopPropagation();saveToSlot(${i},true)">覆盖</button>${!isAuto?`<button class="modal-action-btn small danger" onclick="event.stopPropagation();deleteSaveSlot(${i})">删除</button>`:''}</div>
       </div>`;
     }else{
-      slotsHtml+=`<div class="item-row" style="cursor:pointer;padding:14px;opacity:0.5;" onclick="saveToSlot(${i})">
+      slotsHtml+=`<div class="item-row" style="cursor:pointer;padding:14px;opacity:0.5;" onclick="saveToSlot(${i},true)">
         <div style="flex:1;"><div style="font-weight:600;font-size:0.85rem;">${isAuto?'自动存档':`存档位 ${i}`}</div>
         <div style="font-size:0.73rem;color:var(--text-muted);">空</div></div>
-        <button class="modal-action-btn small" onclick="event.stopPropagation();saveToSlot(${i})">保存</button>
+        <button class="modal-action-btn small" onclick="event.stopPropagation();saveToSlot(${i},true)">保存</button>
       </div>`;
     }
   }
