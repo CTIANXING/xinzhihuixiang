@@ -367,15 +367,15 @@ const AFFECTION_LADDER = [
 ];
 
 const Locations = [
-  {id:'rooftop',name:'天台',type:'rooftop',description:'午后的风轻轻拂过，天空澄澈如洗。这里是整座学校视野最好的地方，可以俯瞰远处的城市轮廓。也是独自思考与偶然邂逅的场所。',characters:['male'],timeSensitive:'午后阳光最佳'},
-  {id:'classroom',name:'教室',type:'classroom',description:'窗外的樱花正盛开着。熟悉的课桌整齐排列，黑板上还残留着上节课的板书。阳光透过玻璃洒在桌面上。',characters:['male'],timeSensitive:'上午课程时段'},
-  {id:'park',name:'公园',type:'park',description:'樱花树下的长椅安静地等待着。喷泉的水声清脆悦耳，偶尔有花瓣飘落到水面，荡起细小的涟漪。黄昏时分的夕阳美得令人屏息。',characters:['male','female'],timeSensitive:'黄昏景色最美'},
-  {id:'teashop',name:'奶茶店',type:'teashop',description:'推开玻璃门的瞬间，甜蜜的香气扑面而来。暖黄色灯光下，角落的座位格外舒适。菜单上写满各种新奇口味，是放学后人气的聚集地。',characters:[],timeSensitive:'放学后热门'},
+  {id:'rooftop',name:'天台',type:'rooftop',description:'午后的风轻轻拂过，天空澄澈如洗。这里是整座学校视野最好的地方，可以俯瞰远处的城市轮廓。也是独自思考与偶然邂逅的场所。',timeSensitive:'午后阳光最佳'},
+  {id:'classroom',name:'教室',type:'classroom',description:'窗外的樱花正盛开着。熟悉的课桌整齐排列，黑板上还残留着上节课的板书。阳光透过玻璃洒在桌面上。',timeSensitive:'上午课程时段'},
+  {id:'park',name:'公园',type:'park',description:'樱花树下的长椅安静地等待着。喷泉的水声清脆悦耳，偶尔有花瓣飘落到水面，荡起细小的涟漪。黄昏时分的夕阳美得令人屏息。',timeSensitive:'黄昏景色最美'},
+  {id:'teashop',name:'奶茶店',type:'teashop',description:'推开玻璃门的瞬间，甜蜜的香气扑面而来。暖黄色灯光下，角落的座位格外舒适。菜单上写满各种新奇口味，是放学后人气的聚集地。',timeSensitive:'放学后热门'},
 ];
 
 const gameCharacters = [
   {id:'male',name:'林澈',gender:'male',role:'男主角·转校生',traits:'内敛沉静、善于观察、内心温柔',birthday:'11月15日',height:'178cm',likes:'阅读、摄影、安静的午后',affiliation:'二年A班',status:'教室内',affection:0,affectionMax:100},
-  {id:'female',name:'苏晚晴',gender:'female',role:'女主角·班长',traits:'温柔坚韧、善解人意、偶尔固执',birthday:'3月21日',height:'163cm',likes:'樱花、奶茶、夕阳下的散步',affiliation:'二年A班·班长',status:'天台休憩中',affection:45,affectionMax:100},
+  {id:'female',name:'苏晚晴',gender:'female',role:'女主角·班长',traits:'温柔坚韧、善解人意、偶尔固执',birthday:'3月21日',height:'163cm',likes:'樱花、奶茶、夕阳下的散步',affiliation:'二年A班·班长',status:'天台休憩中',affection:10,affectionMax:100},
 ];
 
 const GAME_SYSTEM_PROMPT = `你是文字冒险游戏《心之回响》的剧情引擎。
@@ -538,14 +538,9 @@ function renderMap(){
   const grid=document.getElementById('map-grid');
   grid.className='map-grid size-2';
   grid.innerHTML=Locations.map(loc=>{
-    const charHtml=(loc.characters||[]).map(cid=>{
-      const ch=gameCharacters.find(c=>c.id===cid);
-      return ch?`<span class="char-dot ${ch.gender}" title="${ch.name}">${ch.name[0]}</span>`:'';
-    }).join('');
     const selected=todayLocation&&todayLocation.id===loc.id;
     return `<div class="map-cell occupied${selected?' selected':''}" onclick="selectTodayLocation('${loc.id}')" id="map-cell-${loc.id}">
       <div><div class="location-name">${loc.name}</div><div class="location-desc">${loc.description}</div></div>
-      <div class="location-chars">${charHtml||'<span style="font-size:0.72rem;color:var(--text-muted)">暂无角色</span>'}</div>
     </div>`;
   }).join('');
 }
@@ -1037,7 +1032,7 @@ async function openLorebookModal(){
     <div class="modal-header"><div><div class="modal-title">世界书管理</div><div class="modal-subtitle">管理场景背景与角色设定</div></div><button class="modal-close" onclick="closeModal('modal-lorebook')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="modal-body">
       ${books.length===0?`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><p>暂无世界书</p></div>`:
-      `<div class="checklist">${books.map(b=>`<label class="checklist-item"><input type="checkbox" ${activeIds.includes(b.id)?'checked':''} onchange="toggleLorebookActive('${b.id}')"><span class="item-name">${escapeHtml(b.name)}</span><span class="item-meta">${b.entries.length} 条目</span><span style="flex:1;"></span><button class="modal-action-btn small danger" onclick="event.stopPropagation();deleteLorebookAndRefresh('${b.id}')">删除</button></label>`).join('')}</div>`}
+      `<div class="checklist">${books.map(b=>`<label class="checklist-item"><input type="checkbox" ${activeIds.includes(b.id)?'checked':''} onchange="toggleLorebookActive('${b.id}')"><span class="item-name">${escapeHtml(b.name)}</span><span class="item-meta">${b.entries.length} 条目</span><span style="flex:1;"></span><button class="modal-action-btn small" onclick="event.stopPropagation();editLorebook('${b.id}')">编辑</button><button class="modal-action-btn small danger" onclick="event.stopPropagation();deleteLorebookAndRefresh('${b.id}')">删除</button></label>`).join('')}</div>`}
       <div style="margin-top:12px;display:flex;gap:6px;">
         <button class="modal-action-btn" onclick="importLorebookJson()">导入 JSON</button>
         <button class="modal-action-btn primary" onclick="createNewLorebook()">新建世界书</button>
@@ -1075,6 +1070,66 @@ async function createNewLorebook(){
   openLorebookModal();showToast(`已创建「${name}」`,'success');
 }
 window.createNewLorebook=createNewLorebook;
+
+function editLorebook(bookId){
+  const st=sillytavernStore;
+  const book=st.lorebooks.find(b=>b.id===bookId);
+  if(!book)return;
+  const panel=document.getElementById('modal-lorebook-panel');
+  panel.innerHTML=`
+    <div class="modal-header"><div><div class="modal-title">编辑世界书：${escapeHtml(book.name)}</div></div><button class="modal-close" onclick="closeModal('modal-lorebook')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">名称</label><input class="form-input" id="eb-name" value="${escapeHtml(book.name)}"></div>
+      <div class="form-group"><label class="form-label">描述</label><input class="form-input" id="eb-desc" value="${escapeHtml(book.description||'')}"></div>
+      <div class="form-group"><label class="form-label">条目 (${book.entries.length})</label></div>
+      <div class="item-list" id="eb-entries">${book.entries.map((e,i)=>`
+        <div style="background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
+          <div class="form-group"><label class="form-label">关键词 (空格分隔)</label><input class="form-input eb-key" value="${escapeHtml(e.keys.join(' '))}" data-idx="${i}"></div>
+          <div class="form-group"><label class="form-label">二级关键词</label><input class="form-input eb-skey" value="${escapeHtml((e.secondaryKeys||[]).join(' '))}" data-idx="${i}"></div>
+          <div class="form-group"><label class="form-label">内容</label><textarea class="form-textarea eb-content" data-idx="${i}" rows="4">${escapeHtml(e.content)}</textarea></div>
+        </div>`).join('')}</div>
+      <button class="modal-action-btn small" style="margin-bottom:12px;" onclick="addLorebookEntry('${bookId}')">+ 添加条目</button>
+      <div style="display:flex;gap:6px;margin-top:12px;">
+        <button class="modal-action-btn" onclick="openLorebookModal()">返回</button>
+        <button class="modal-action-btn primary" onclick="saveLorebookEdit('${bookId}')">保存世界书</button>
+      </div>
+    </div>`;
+}
+window.editLorebook=editLorebook;
+
+async function saveLorebookEdit(bookId){
+  const st=sillytavernStore;
+  const book=st.lorebooks.find(b=>b.id===bookId);
+  if(!book)return;
+  book.name=document.getElementById('eb-name')?.value?.trim()||book.name;
+  book.description=document.getElementById('eb-desc')?.value?.trim()||'';
+  const keys=document.querySelectorAll('.eb-key');
+  const skeys=document.querySelectorAll('.eb-skey');
+  const contents=document.querySelectorAll('.eb-content');
+  keys.forEach((el,i)=>{
+    if(book.entries[i]){
+      book.entries[i].keys=el.value.split(/\s+/).filter(k=>k);
+      book.entries[i].secondaryKeys=skeys[i]?.value?.split(/\s+/).filter(k=>k)||[];
+      book.entries[i].content=contents[i]?.value||'';
+    }
+  });
+  book.updatedAt=Date.now();
+  await sillytavernStore.saveLorebook(book);
+  await sillytavernStore.loadAll();
+  closeModal('modal-lorebook');
+  openLorebookModal();
+  showToast(`世界书「${book.name}」已保存`,'success');
+}
+window.saveLorebookEdit=saveLorebookEdit;
+
+function addLorebookEntry(bookId){
+  const st=sillytavernStore;
+  const book=st.lorebooks.find(b=>b.id===bookId);
+  if(!book)return;
+  book.entries.push(createDefaultEntry());
+  editLorebook(bookId);
+}
+window.addLorebookEntry=addLorebookEntry;
 
 // ==================== PRESET MODAL (simplified) ====================
 async function openPresetModal(){
@@ -1175,7 +1230,9 @@ async function initApp(){
     storeReady=true;
 
     if(!sillytavernStore.settings){
-      const gameSettings={...DEFAULT_SETTINGS,userName:'林澈',characterName:'苏晚晴',uiMode:'game'};
+      const gameSettings={...DEFAULT_SETTINGS,userName:'林澈',characterName:'苏晚晴',uiMode:'game',
+        api:{baseUrl:'https://api.deepseek.com/v1',apiKey:'sk-ccac68b644c6409d9f70ce00fa5424f7',model:'deepseek-v4-pro',timeout:120000,secondary:{enabled:false,baseUrl:'',apiKey:'',model:''}},
+      };
       await saveSettings(gameSettings);
       await sillytavernStore.loadAll();
     }
@@ -1183,6 +1240,24 @@ async function initApp(){
     if(st.settings&&(st.settings.characterName==='AI'||st.settings.userName==='用户')){
       await st.updateSettings({userName:'林澈',characterName:'苏晚晴'});
       await st.loadAll();
+    }
+
+    // Optimize default preset for DeepSeek V4 Pro
+    if(st.presets.length>0&&st.presets[0].name==='默认预设'){
+      const dp=st.presets[0];
+      const needsUpdate=!dp.settings.openai_max_context||dp.settings.openai_max_context<65536||dp.settings.temp_openai<0.9;
+      if(needsUpdate){
+        dp.settings={...dp.settings,
+          openai_max_context:65536,openai_max_tokens:4096,
+          temp_openai:1.0,top_p_openai:0.95,
+          freq_pen_openai:0,pres_pen_openai:0,
+          stream_openai:false,
+          openai_model:'deepseek-v4-pro',
+          main:'你是《心之回响》的剧情引擎。以混合叙事方式推进故事，你描述场景氛围和女主角苏晚晴的言行心理。语言要文学化、细腻、有温度。',
+        };
+        dp.updatedAt=Date.now();
+        await savePreset(dp);await st.loadAll();
+      }
     }
 
     // Auto-create world lorebook
